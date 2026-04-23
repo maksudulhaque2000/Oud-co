@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Product, ProductCategory } from "@/types/product";
 import {
   createProductImagePreview,
@@ -209,7 +208,7 @@ export default function ProductForm({
             <p className="border-b border-[#d6b36a]/20 px-4 py-2 text-xs text-[#cdb890]">
               {fileName ? `Uploaded: ${fileName}` : "Image preview"}
             </p>
-            <Image src={preview} alt="Preview" width={1200} height={800} className="h-48 w-full object-cover" />
+            <img src={preview} alt="Preview" className="h-48 w-full object-cover" />
           </div>
         ) : null}
 
