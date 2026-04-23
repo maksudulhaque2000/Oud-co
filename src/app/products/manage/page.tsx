@@ -24,7 +24,7 @@ export default function ManageProductsPage() {
     <ProtectedRoute>
       <main className="mx-auto w-full max-w-6xl px-4 py-12 md:px-6">
         <h1 className="text-3xl font-bold text-[#f5e6c2]">Manage Products</h1>
-        <p className="mt-2 text-sm text-[#dccba6]">View and remove products stored in local storage.</p>
+        <p className="mt-2 text-sm text-[#dccba6]">View, edit, and remove products stored in local storage.</p>
 
         <section className="mt-6 hidden overflow-hidden rounded-xl border border-[#d6b36a]/20 md:block">
           <table className="w-full border-collapse">
@@ -59,6 +59,12 @@ export default function ManageProductsPage() {
                         className="rounded-md border border-[#d6b36a]/40 px-3 py-1.5 text-xs text-[#f0dca7]"
                       >
                         View
+                      </Link>
+                      <Link
+                        href={`/products/manage/${product.id}`}
+                        className="rounded-md border border-[#d6b36a]/40 px-3 py-1.5 text-xs text-[#f0dca7]"
+                      >
+                        Edit
                       </Link>
                       <button
                         type="button"
@@ -99,6 +105,12 @@ export default function ManageProductsPage() {
                   className="rounded-md border border-[#d6b36a]/40 px-3 py-2 text-xs text-[#f0dca7]"
                 >
                   View
+                </Link>
+                <Link
+                  href={`/products/manage/${product.id}`}
+                  className="rounded-md border border-[#d6b36a]/40 px-3 py-2 text-xs text-[#f0dca7]"
+                >
+                  Edit
                 </Link>
                 <button
                   type="button"

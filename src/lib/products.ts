@@ -1,16 +1,10 @@
 import { NewProductInput, Product, ProductCategory } from "@/types/product";
 
 const STORAGE_KEY = "oud_co_custom_products_v1";
+const OVERRIDES_KEY = "oud_co_product_overrides_v1";
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=1200&q=80";
 
-export const categories: ProductCategory[] = [
-  "Oud",
-  "Rose",
-  "Musk",
-  "Oriental",
-  "Floral",
-  "Woody",
-];
+export const categories: ProductCategory[] = ["Oud", "Rose", "Musk", "Oriental", "Floral", "Woody"];
 
 export const staticProducts: Product[] = [
   {
@@ -115,34 +109,78 @@ function canUseStorage() {
   return typeof window !== "undefined";
 }
 
-export function getCustomProducts(): Product[] {
+function readJson<T>(key: string, fallback: T): T {
   if (!canUseStorage()) {
-    return [];
+    return fallback;
   }
 
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  const raw = window.localStorage.getItem(key);
   if (!raw) {
-    return [];
+    return fallback;
   }
 
   try {
-    const parsed = JSON.parse(raw) as Product[];
-    return Array.isArray(parsed) ? parsed : [];
+    return JSON.parse(raw) as T;
   } catch {
-    return [];
+    return fallback;
   }
 }
 
-function setCustomProducts(products: Product[]) {
+function writeJson(key: string, value: unknown) {
   if (!canUseStorage()) {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+function upsertProduct(list: Product[], product: Product): Product[] {
+  const index = list.findIndex((item) => item.id === product.id);
+  if (index === -1) {
+    return [product, ...list];
+  }
+
+  const next = [...list];
+  next[index] = product;
+  return next;
+}
+
+function getProductOverrides(): Record<string, Product> {
+  const overrides = readJson<Record<string, Product>>(OVERRIDES_KEY, {});
+  return overrides && typeof overrides === "object" ? overrides : {};
+}
+
+function setCustomProducts(products: Product[]) {
+  writeJson(STORAGE_KEY, products);
+}
+
+function setProductOverrides(overrides: Record<string, Product>) {
+  writeJson(OVERRIDES_KEY, overrides);
+}
+
+export function getCustomProducts(): Product[] {
+  const products = readJson<Product[]>(STORAGE_KEY, []);
+  return Array.isArray(products) ? products : [];
+}
+
+export function isCustomProductId(id: string) {
+  return id.startsWith("custom-");
+}
+
+export function isStaticProductId(id: string) {
+  return staticProducts.some((product) => product.id === id);
 }
 
 export function getAllProducts(): Product[] {
-  return [...getCustomProducts(), ...staticProducts];
+  const customProducts = getCustomProducts();
+  const overrides = getProductOverrides();
+
+  const mergedStaticProducts = staticProducts.map((product) => {
+    const override = overrides[product.id];
+    return override ? { ...product, ...override, id: product.id } : product;
+  });
+
+  return [...customProducts, ...mergedStaticProducts];
 }
 
 export function getProductById(id: string): Product | undefined {
@@ -166,12 +204,70 @@ export function addCustomProduct(input: NewProductInput): Product {
     notes: "Custom blend",
   };
 
-  setCustomProducts([next, ...products]);
+  setCustomProducts(upsertProduct(products, next));
   return next;
 }
 
+export function updateProduct(product: Product): Product {
+  if (isCustomProductId(product.id)) {
+    const products = getCustomProducts();
+    setCustomProducts(upsertProduct(products, product));
+    return product;
+  }
+
+  const overrides = getProductOverrides();
+  setProductOverrides({
+    ...overrides,
+    [product.id]: product,
+  });
+
+  return product;
+}
+
+export function deleteProduct(id: string): void {
+  if (isCustomProductId(id)) {
+    const products = getCustomProducts();
+    setCustomProducts(products.filter((product) => product.id !== id));
+    return;
+  }
+
+  const overrides = getProductOverrides();
+  if (overrides[id]) {
+    const nextOverrides = { ...overrides };
+    delete nextOverrides[id];
+    setProductOverrides(nextOverrides);
+  }
+}
+
 export function removeCustomProduct(id: string): void {
-  const products = getCustomProducts();
-  const updated = products.filter((product) => product.id !== id);
-  setCustomProducts(updated);
+  deleteProduct(id);
+}
+
+export function createProductImagePreview(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === "string") {
+        resolve(result);
+        return;
+      }
+
+      reject(new Error("Unable to read image file."));
+    };
+
+    reader.onerror = () => reject(new Error("Unable to read image file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+export function getProductFormDefaults(product?: Product | null) {
+  return {
+    title: product?.title ?? "",
+    shortDescription: product?.shortDescription ?? "",
+    fullDescription: product?.fullDescription ?? "",
+    category: product?.category ?? categories[0],
+    price: product ? String(product.price) : "",
+    imageUrl: product?.imageUrl ?? "",
+  };
 }
