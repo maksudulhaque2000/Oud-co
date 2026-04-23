@@ -134,6 +134,40 @@ function writeJson(key: string, value: unknown) {
   window.localStorage.setItem(key, JSON.stringify(value));
 }
 
+export function isValidImageSource(value: string) {
+  const src = value.trim();
+  if (!src) {
+    return false;
+  }
+
+  if (src.startsWith("data:image/")) {
+    return true;
+  }
+
+  if (src.startsWith("/")) {
+    return true;
+  }
+
+  try {
+    const parsed = new URL(src);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function normalizeImageSource(value?: string) {
+  const src = value?.trim() ?? "";
+  return isValidImageSource(src) ? src : DEFAULT_IMAGE;
+}
+
+function sanitizeProductImage(product: Product): Product {
+  return {
+    ...product,
+    imageUrl: normalizeImageSource(product.imageUrl),
+  };
+}
+
 function upsertProduct(list: Product[], product: Product): Product[] {
   const index = list.findIndex((item) => item.id === product.id);
   if (index === -1) {
@@ -177,10 +211,11 @@ export function getAllProducts(): Product[] {
 
   const mergedStaticProducts = staticProducts.map((product) => {
     const override = overrides[product.id];
-    return override ? { ...product, ...override, id: product.id } : product;
+    const merged = override ? { ...product, ...override, id: product.id } : product;
+    return sanitizeProductImage(merged);
   });
 
-  return [...customProducts, ...mergedStaticProducts];
+  return [...customProducts.map(sanitizeProductImage), ...mergedStaticProducts];
 }
 
 export function getProductById(id: string): Product | undefined {
@@ -196,7 +231,7 @@ export function addCustomProduct(input: NewProductInput): Product {
     fullDescription: input.fullDescription.trim(),
     category: input.category,
     price: input.price,
-    imageUrl: input.imageUrl?.trim() || DEFAULT_IMAGE,
+    imageUrl: normalizeImageSource(input.imageUrl),
     rating: 4.5,
     volume: "10ml",
     origin: "Bangladesh",
@@ -209,19 +244,21 @@ export function addCustomProduct(input: NewProductInput): Product {
 }
 
 export function updateProduct(product: Product): Product {
+  const nextProduct = sanitizeProductImage(product);
+
   if (isCustomProductId(product.id)) {
     const products = getCustomProducts();
-    setCustomProducts(upsertProduct(products, product));
-    return product;
+    setCustomProducts(upsertProduct(products, nextProduct));
+    return nextProduct;
   }
 
   const overrides = getProductOverrides();
   setProductOverrides({
     ...overrides,
-    [product.id]: product,
+    [product.id]: nextProduct,
   });
 
-  return product;
+  return nextProduct;
 }
 
 export function deleteProduct(id: string): void {

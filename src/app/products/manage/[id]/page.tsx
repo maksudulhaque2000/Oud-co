@@ -4,10 +4,13 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import ProductForm from "@/components/ProductForm";
 import { getProductById, updateProduct } from "@/lib/products";
 import { Product } from "@/types/product";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
 
 export default function EditProductPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const { pushToast } = useToast();
   const product = getProductById(params.id) as Product | undefined;
 
   if (!product) {
@@ -28,7 +31,6 @@ export default function EditProductPage() {
           heading="Edit Product"
           description="Update product details and save your changes."
           submitLabel="Update Product"
-          successMessage="Product updated successfully."
           onSubmit={async (values) => {
             updateProduct({
               ...product,
@@ -39,6 +41,12 @@ export default function EditProductPage() {
               price: values.price,
               imageUrl: values.imageUrl,
             });
+            pushToast({
+              title: "Product Updated",
+              message: "Your changes were saved successfully.",
+              variant: "success",
+            });
+            router.push(`/products/${product.id}`);
           }}
         />
       </main>

@@ -2,6 +2,8 @@
 
 import { Product, ProductCategory } from "@/types/product";
 import {
+  isValidImageSource,
+  normalizeImageSource,
   createProductImagePreview,
   getProductFormDefaults,
   categories,
@@ -22,7 +24,6 @@ type Props = {
   heading: string;
   description: string;
   submitLabel: string;
-  successMessage: string;
   onSubmit: (values: ProductFormValues) => Promise<void> | void;
 };
 
@@ -31,7 +32,6 @@ export default function ProductForm({
   heading,
   description,
   submitLabel,
-  successMessage,
   onSubmit,
 }: Props) {
   const defaults = getProductFormDefaults(initialProduct);
@@ -44,8 +44,7 @@ export default function ProductForm({
   const [imageUrl, setImageUrl] = useState(defaults.imageUrl);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [preview, setPreview] = useState(defaults.imageUrl);
+  const [preview, setPreview] = useState(isValidImageSource(defaults.imageUrl) ? defaults.imageUrl : "");
   const [fileName, setFileName] = useState("");
 
   function validate() {
@@ -68,6 +67,8 @@ export default function ProductForm({
     }
     if (!imageUrl.trim()) {
       nextErrors.imageUrl = "Please upload an image or provide an image URL.";
+    } else if (!isValidImageSource(imageUrl)) {
+      nextErrors.imageUrl = "Image must be a valid URL or uploaded image file.";
     }
 
     setErrors(nextErrors);
@@ -97,7 +98,6 @@ export default function ProductForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSuccess("");
 
     if (!validate()) {
       return;
@@ -111,9 +111,8 @@ export default function ProductForm({
         fullDescription: fullDescription.trim(),
         category,
         price: Number(price),
-        imageUrl: imageUrl.trim(),
+        imageUrl: normalizeImageSource(imageUrl),
       });
-      setSuccess(successMessage);
     } finally {
       setLoading(false);
     }
@@ -189,8 +188,9 @@ export default function ProductForm({
           <input
             value={imageUrl}
             onChange={(event) => {
-              setImageUrl(event.target.value);
-              setPreview(event.target.value);
+              const nextUrl = event.target.value;
+              setImageUrl(nextUrl);
+              setPreview(isValidImageSource(nextUrl) ? nextUrl : "");
               setFileName("");
             }}
             placeholder="Image URL"
@@ -211,8 +211,6 @@ export default function ProductForm({
             <img src={preview} alt="Preview" className="h-48 w-full object-cover" />
           </div>
         ) : null}
-
-        {success ? <p className="text-sm text-emerald-300">{success}</p> : null}
 
         <button
           type="submit"

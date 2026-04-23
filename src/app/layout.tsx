@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/context/ToastContext";
 
 const headingFont = Cinzel({
   variable: "--font-heading",
@@ -29,11 +30,13 @@ export default function RootLayout({
     <html lang="en" className={`${headingFont.variable} ${bodyFont.variable} h-full antialiased`}>
       <body className="min-h-full">
         <AuthProvider>
-          <div className="app-shell">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <ToastProvider>
+            <div className="app-shell">
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

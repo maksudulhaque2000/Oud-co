@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { normalizeImageSource } from "@/lib/products";
 import { Product } from "@/types/product";
 
 type Props = {
@@ -7,11 +8,13 @@ type Props = {
 };
 
 export default function ProductCard({ product }: Props) {
+  const imageSrc = normalizeImageSource(product.imageUrl);
+
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-[#d6b36a]/20 bg-[#17100b] shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
       <div className="h-56 overflow-hidden">
         <Image
-          src={product.imageUrl}
+          src={imageSrc}
           alt={product.title}
           width={1200}
           height={900}

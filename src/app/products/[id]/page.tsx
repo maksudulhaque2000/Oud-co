@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
-import { getAllProducts } from "@/lib/products";
+import { getAllProducts, normalizeImageSource } from "@/lib/products";
 
 export default function ProductDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -20,6 +20,7 @@ export default function ProductDetailsPage() {
   }
 
   const related = products.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 3);
+  const imageSrc = normalizeImageSource(product.imageUrl);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-12 md:px-6">
@@ -30,7 +31,7 @@ export default function ProductDetailsPage() {
       <section className="grid gap-8 rounded-2xl border border-[#d6b36a]/20 bg-[#130e0a] p-6 md:grid-cols-2 md:p-8">
         <div className="overflow-hidden rounded-xl">
           <Image
-            src={product.imageUrl}
+            src={imageSrc}
             alt={product.title}
             width={1200}
             height={900}

@@ -3,21 +3,40 @@
 import Link from "next/link";
 import Image from "next/image";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/context/ToastContext";
 import { getAllProducts, removeCustomProduct } from "@/lib/products";
 import { useState } from "react";
 
 export default function ManageProductsPage() {
   const [, setRefreshKey] = useState(0);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { pushToast } = useToast();
   const products = getAllProducts();
 
-  function handleDelete(id: string) {
-    const ok = window.confirm("Are you sure you want to delete this product?");
-    if (!ok) {
+  function openDeleteModal(id: string) {
+    setPendingDeleteId(id);
+  }
+
+  async function handleDeleteConfirmed() {
+    if (!pendingDeleteId) {
       return;
     }
 
-    removeCustomProduct(id);
-    setRefreshKey((previous) => previous + 1);
+    try {
+      setDeleting(true);
+      removeCustomProduct(pendingDeleteId);
+      setRefreshKey((previous) => previous + 1);
+      setPendingDeleteId(null);
+      pushToast({
+        title: "Product Deleted",
+        message: "Selected product has been removed.",
+        variant: "success",
+      });
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -68,7 +87,7 @@ export default function ManageProductsPage() {
                       </Link>
                       <button
                         type="button"
-                        onClick={() => handleDelete(product.id)}
+                        onClick={() => openDeleteModal(product.id)}
                         disabled={!product.id.startsWith("custom-")}
                         className="rounded-md border border-rose-400/40 px-3 py-1.5 text-xs text-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
                       >
@@ -114,7 +133,7 @@ export default function ManageProductsPage() {
                 </Link>
                 <button
                   type="button"
-                  onClick={() => handleDelete(product.id)}
+                  onClick={() => openDeleteModal(product.id)}
                   disabled={!product.id.startsWith("custom-")}
                   className="rounded-md border border-rose-400/40 px-3 py-2 text-xs text-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -124,6 +143,17 @@ export default function ManageProductsPage() {
             </article>
           ))}
         </section>
+
+        <ConfirmModal
+          isOpen={Boolean(pendingDeleteId)}
+          title="Delete Product"
+          message="Are you sure you want to delete this product? This action cannot be undone."
+          confirmText="Yes, Delete"
+          cancelText="No"
+          loading={deleting}
+          onCancel={() => setPendingDeleteId(null)}
+          onConfirm={handleDeleteConfirmed}
+        />
       </main>
     </ProtectedRoute>
   );
