@@ -49,11 +49,11 @@ export default function Home() {
           <div className="relative">
             <div className="absolute -left-6 top-8 h-32 w-32 rounded-full bg-[#c9a84c]/20 blur-2xl" />
             <Image
-              src="https://images.unsplash.com/photo-1619994403073-2cecbe7dd117?auto=format&fit=crop&w=1200&q=80"
+              src="/hero.png"
               alt="Luxury attar bottles"
               width={1200}
               height={800}
-              className="h-[440px] w-full rounded-2xl object-cover"
+              className="h-full w-full rounded-2xl object-cover"
             />
           </div>
         </div>
