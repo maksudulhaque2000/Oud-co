@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Oud.co
 
-## Getting Started
+Oud.co is a Next.js e-commerce style project for perfume oils and attar products.
 
-First, run the development server:
+## Local Development
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Copy env template and add Firebase values:
+
+```bash
+cp .env.local.example .env.local
+```
+
+3. Run the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pre-Deploy Validation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Run this before any deployment:
 
-## Learn More
+```bash
+npm run deploy:check
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy to Vercel (CLI)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Login once:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npx vercel login
+```
 
-## Deploy on Vercel
+2. Link project (first time only):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npx vercel link
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Set required environment variables in Vercel:
+
+```bash
+npx vercel env add NEXT_PUBLIC_FIREBASE_API_KEY production
+npx vercel env add NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN production
+npx vercel env add NEXT_PUBLIC_FIREBASE_PROJECT_ID production
+npx vercel env add NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET production
+npx vercel env add NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID production
+npx vercel env add NEXT_PUBLIC_FIREBASE_APP_ID production
+```
+
+4. Deploy to production:
+
+```bash
+npx vercel deploy --prod
+```
+
+## Deploy from Vercel Dashboard
+
+1. Import repository into Vercel
+2. Framework preset: Next.js
+3. Build command: npm run build
+4. Install command: npm ci
+5. Add all NEXT*PUBLIC_FIREBASE*\* variables
+6. Deploy
+
+## Post-Deployment Checklist
+
+1. Verify login/register and Google auth
+2. Verify protected routes
+3. Verify add/edit/delete product flows
+4. Verify image previews and product images

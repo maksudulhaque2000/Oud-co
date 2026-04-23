@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy:check": "npm run lint && npm run build"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "firebase": "^12.12.1",
