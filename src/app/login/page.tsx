@@ -29,8 +29,8 @@ function LoginForm() {
       setLoading(true);
       await login(email, password);
       router.push(next);
-    } catch {
-      setError("Login failed. Please check your credentials.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -42,8 +42,8 @@ function LoginForm() {
       setLoading(true);
       await loginWithGoogle();
       router.push(next);
-    } catch {
-      setError("Google login failed. Please try again.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Google login failed. Please try again.");
     } finally {
       setLoading(false);
     }

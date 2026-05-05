@@ -190,7 +190,10 @@ Firebase setup checklist:
 - Enable Authentication
 - Enable Email/Password provider
 - Enable Google provider
-- Add your app domain to authorized domains
+- Add your localhost and Vercel domains to Firebase Authentication > Settings > Authorized domains
+- Set the Firebase web config variables in Vercel Project Settings > Environment Variables for Production and Preview deployments
+
+If login or registration works locally but fails on the live Vercel URL, the usual cause is that the deployed domain is missing from Firebase Authorized domains or one of the `NEXT_PUBLIC_FIREBASE_*` variables is not configured in Vercel.
 
 ## Getting Started
 
@@ -241,6 +244,7 @@ If additional external image hosts are required, add them to `images.remotePatte
 ## Deployment Notes
 
 - Vercel configuration file exists: `vercel.json`
+- Before deploying, confirm the live domain is listed in Firebase Authorized domains and that all Firebase environment variables are set in Vercel.
 - Recommended pre-deploy check:
 
 ```bash
