@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import ProductCard from "@/components/ProductCard";
-import { categories, getAllProducts } from "@/lib/products";
+import { categories } from "@/lib/products";
+import { useProducts } from "@/context/ProductsContext";
 import { ProductCategory } from "@/types/product";
 
 type PriceFilter = "all" | "under500" | "500to1000" | "above1000";
@@ -11,8 +12,7 @@ export default function ProductsPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<"all" | ProductCategory>("all");
   const [price, setPrice] = useState<PriceFilter>("all");
-
-  const products = getAllProducts();
+  const { products, loading, error } = useProducts();
 
   const filtered = useMemo(() => {
     return products.filter((product) => {
@@ -34,6 +34,10 @@ export default function ProductsPage() {
         <h1 className="text-4xl font-bold text-[#f5e6c2]">Our Collection</h1>
         <p className="mt-2 text-[#dccba6]">Discover premium attars and perfume oils curated for every mood.</p>
       </header>
+
+      {error ? (
+        <p className="mb-6 rounded-lg border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</p>
+      ) : null}
 
       <section className="mb-8 grid gap-3 md:grid-cols-3">
         <input
@@ -69,7 +73,11 @@ export default function ProductsPage() {
         </select>
       </section>
 
-      {filtered.length > 0 ? (
+      {loading && filtered.length === 0 ? (
+        <p className="rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-center text-[#dccba6]">
+          Loading products from the database...
+        </p>
+      ) : filtered.length > 0 ? (
         <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((product) => (
             <ProductCard key={product.id} product={product} />

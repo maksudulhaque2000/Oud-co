@@ -1,20 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
-import { getAllProducts, normalizeImageSource } from "@/lib/products";
+import { normalizeImageSource } from "@/lib/products";
+import { useProducts } from "@/context/ProductsContext";
 
 export default function ProductDetailsPage() {
   const params = useParams<{ id: string }>();
-  const products = getAllProducts();
+  const { products, loading, error } = useProducts();
   const product = products.find((item) => item.id === params.id);
+
+  if (loading && !product) {
+    return (
+      <main className="mx-auto w-full max-w-5xl px-4 py-16 md:px-6">
+        <p className="rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">
+          Loading product details...
+        </p>
+      </main>
+    );
+  }
 
   if (!product) {
     return (
       <main className="mx-auto w-full max-w-5xl px-4 py-16 md:px-6">
-        <p className="rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">Product not found.</p>
+        <p className="rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">{error ?? "Product not found."}</p>
       </main>
     );
   }
@@ -30,13 +40,7 @@ export default function ProductDetailsPage() {
 
       <section className="grid gap-8 rounded-2xl border border-[#d6b36a]/20 bg-[#130e0a] p-6 md:grid-cols-2 md:p-8">
         <div className="overflow-hidden rounded-xl">
-          <Image
-            src={imageSrc}
-            alt={product.title}
-            width={1200}
-            height={900}
-            className="h-full w-full object-cover"
-          />
+          <img src={imageSrc} alt={product.title} className="h-full w-full object-cover" />
         </div>
 
         <div>

@@ -10,7 +10,9 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { auth, googleProvider } from "@/lib/firebase";
+import { getFirebaseConfigError, getFirebaseServices } from "@/lib/firebase";
+import { ensureUserProfile, isBootstrapAdmin } from "@/lib/users";
+import { UserRole } from "@/types/user";
 
 type RegisterInput = {
   name: string;
@@ -20,7 +22,10 @@ type RegisterInput = {
 
 type AuthContextValue = {
   user: User | null;
+  role: UserRole;
   loading: boolean;
+  canManageProducts: boolean;
+  canManageUsers: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
@@ -65,51 +70,104 @@ function getAuthErrorMessage(error: unknown) {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const firebaseServices = getFirebaseServices();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<UserRole>("customer");
+  const [loading, setLoading] = useState(() => Boolean(firebaseServices));
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+    if (!firebaseServices) {
+      return;
+    }
+
+    let active = true;
+
+    const unsubscribe = onAuthStateChanged(firebaseServices.auth, async (nextUser) => {
+      if (!active) {
+        return;
+      }
+
       setUser(nextUser);
-      setLoading(false);
+
+      if (!nextUser) {
+        setRole("customer");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const profile = await ensureUserProfile(nextUser);
+        if (!active) {
+          return;
+        }
+
+        setRole(profile.role);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
     });
 
-    return unsubscribe;
-  }, []);
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [firebaseServices]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
+      role,
       loading,
+      canManageProducts: role === "admin" || isBootstrapAdmin(user),
+      canManageUsers: role === "admin" || isBootstrapAdmin(user),
       async login(email: string, password: string) {
+        if (!firebaseServices) {
+          throw new Error(getFirebaseConfigError() ?? "Firebase Authentication is not configured.");
+        }
+
         try {
-          await signInWithEmailAndPassword(auth, email, password);
+          await signInWithEmailAndPassword(firebaseServices.auth, email, password);
         } catch (error) {
           throw new Error(getAuthErrorMessage(error));
         }
       },
       async register(input: RegisterInput) {
+        if (!firebaseServices) {
+          throw new Error(getFirebaseConfigError() ?? "Firebase Authentication is not configured.");
+        }
+
         try {
-          const credential = await createUserWithEmailAndPassword(auth, input.email, input.password);
+          const credential = await createUserWithEmailAndPassword(firebaseServices.auth, input.email, input.password);
           if (input.name.trim()) {
             await updateProfile(credential.user, { displayName: input.name.trim() });
           }
+          await ensureUserProfile(credential.user);
         } catch (error) {
           throw new Error(getAuthErrorMessage(error));
         }
       },
       async loginWithGoogle() {
+        if (!firebaseServices) {
+          throw new Error(getFirebaseConfigError() ?? "Firebase Authentication is not configured.");
+        }
+
         try {
-          await signInWithPopup(auth, googleProvider);
+          await signInWithPopup(firebaseServices.auth, firebaseServices.googleProvider);
         } catch (error) {
           throw new Error(getAuthErrorMessage(error));
         }
       },
       async logout() {
-        await signOut(auth);
+        if (!firebaseServices) {
+          return;
+        }
+
+        await signOut(firebaseServices.auth);
       },
     }),
-    [loading, user],
+    [firebaseServices, loading, role, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

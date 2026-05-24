@@ -1,11 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
-import { staticProducts } from "@/lib/products";
+import { useProducts } from "@/context/ProductsContext";
 import { Gem, Globe2, Sparkles, Truck } from "lucide-react";
 
 export default function Home() {
-  const featured = staticProducts.slice(0, 6);
+  const { products, loading, error } = useProducts();
+  const featured = products.slice(0, 6);
 
   const testimonials = [
     {
@@ -66,11 +69,19 @@ export default function Home() {
             View all products
           </Link>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {error ? (
+          <p className="rounded-lg border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</p>
+        ) : loading && featured.length === 0 ? (
+          <p className="rounded-lg border border-[#d6b36a]/20 bg-[#130e0a] p-4 text-sm text-[#dccba6]">
+            Loading products from the database...
+          </p>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="border-y border-[#d6b36a]/20 bg-[#120d08]">

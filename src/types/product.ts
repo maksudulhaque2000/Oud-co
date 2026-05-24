@@ -13,6 +13,8 @@ export type Product = {
   origin: string;
   longevity: string;
   notes: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type NewProductInput = {

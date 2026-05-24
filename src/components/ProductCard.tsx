@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { normalizeImageSource } from "@/lib/products";
 import { Product } from "@/types/product";
 
@@ -13,13 +12,7 @@ export default function ProductCard({ product }: Props) {
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-[#d6b36a]/20 bg-[#17100b] shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
       <div className="h-56 overflow-hidden">
-        <Image
-          src={imageSrc}
-          alt={product.title}
-          width={1200}
-          height={900}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-        />
+        <img src={imageSrc} alt={product.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
       </div>
       <div className="flex h-full flex-col p-4">
         <span className="mb-2 inline-flex w-fit rounded-full bg-[#2f2114] px-2.5 py-1 text-xs font-semibold text-[#eecf8b]">

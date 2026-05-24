@@ -1,7 +1,18 @@
-import { initializeApp, getApps } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { FirebaseApp, FirebaseOptions, getApp, getApps, initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
-function readFirebaseConfig() {
+type FirebaseServices = {
+  app: FirebaseApp;
+  auth: Auth;
+  db: Firestore;
+  googleProvider: GoogleAuthProvider;
+};
+
+let cachedServices: FirebaseServices | null = null;
+let firebaseConfigError: string | null = null;
+
+function readFirebaseConfig(): FirebaseOptions | null {
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim();
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.trim();
   const appId = process.env.NEXT_PUBLIC_FIREBASE_APP_ID?.trim();
@@ -16,10 +27,11 @@ function readFirebaseConfig() {
   ].filter(Boolean);
 
   if (missing.length > 0) {
-    throw new Error(
-      `Missing Firebase environment variables: ${missing.join(", ")}. Configure them in Vercel and in your local .env.local file before using authentication.`,
-    );
+    firebaseConfigError = `Missing Firebase environment variables: ${missing.join(", ")}. Add them to Vercel and your local .env.local file.`;
+    return null;
   }
+
+  firebaseConfigError = null;
 
   return {
     apiKey,
@@ -31,8 +43,28 @@ function readFirebaseConfig() {
   };
 }
 
-const firebaseConfig = readFirebaseConfig();
+export function getFirebaseConfigError() {
+  return firebaseConfigError;
+}
 
-export const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+export function getFirebaseServices(): FirebaseServices | null {
+  if (cachedServices) {
+    return cachedServices;
+  }
+
+  const firebaseConfig = readFirebaseConfig();
+  if (!firebaseConfig) {
+    return null;
+  }
+
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+  cachedServices = {
+    app,
+    auth: getAuth(app),
+    db: getFirestore(app),
+    googleProvider: new GoogleAuthProvider(),
+  };
+
+  return cachedServices;
+}

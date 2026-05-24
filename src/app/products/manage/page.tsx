@@ -1,19 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/context/ToastContext";
-import { getAllProducts, removeCustomProduct } from "@/lib/products";
+import { useProducts } from "@/context/ProductsContext";
 import { useState } from "react";
 
 export default function ManageProductsPage() {
-  const [, setRefreshKey] = useState(0);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const { pushToast } = useToast();
-  const products = getAllProducts();
+  const { products, loading, error, deleteProduct } = useProducts();
 
   function openDeleteModal(id: string) {
     setPendingDeleteId(id);
@@ -26,8 +24,7 @@ export default function ManageProductsPage() {
 
     try {
       setDeleting(true);
-      removeCustomProduct(pendingDeleteId);
-      setRefreshKey((previous) => previous + 1);
+      await deleteProduct(pendingDeleteId);
       setPendingDeleteId(null);
       pushToast({
         title: "Product Deleted",
@@ -40,10 +37,16 @@ export default function ManageProductsPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requireAdmin>
       <main className="mx-auto w-full max-w-6xl px-4 py-12 md:px-6">
         <h1 className="text-3xl font-bold text-[#f5e6c2]">Manage Products</h1>
-        <p className="mt-2 text-sm text-[#dccba6]">View, edit, and remove products stored in local storage.</p>
+        <p className="mt-2 text-sm text-[#dccba6]">View, edit, and remove products stored in the live database.</p>
+
+        {error ? <p className="mt-4 rounded-lg border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</p> : null}
+
+        {loading && products.length === 0 ? (
+          <p className="mt-6 rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">Loading products...</p>
+        ) : null}
 
         <section className="mt-6 hidden overflow-hidden rounded-xl border border-[#d6b36a]/20 md:block">
           <table className="w-full border-collapse">
@@ -60,13 +63,7 @@ export default function ManageProductsPage() {
               {products.map((product) => (
                 <tr key={product.id} className="border-t border-[#d6b36a]/20 text-sm text-[#dccba6]">
                   <td className="px-4 py-3">
-                    <Image
-                      src={product.imageUrl}
-                      alt={product.title}
-                      width={56}
-                      height={56}
-                      className="h-14 w-14 rounded object-cover"
-                    />
+                    <img src={product.imageUrl} alt={product.title} className="h-14 w-14 rounded object-cover" />
                   </td>
                   <td className="px-4 py-3">{product.title}</td>
                   <td className="px-4 py-3">{product.category}</td>
@@ -85,12 +82,7 @@ export default function ManageProductsPage() {
                       >
                         Edit
                       </Link>
-                      <button
-                        type="button"
-                        onClick={() => openDeleteModal(product.id)}
-                        disabled={!product.id.startsWith("custom-")}
-                        className="rounded-md border border-rose-400/40 px-3 py-1.5 text-xs text-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
+                      <button type="button" onClick={() => openDeleteModal(product.id)} className="rounded-md border border-rose-400/40 px-3 py-1.5 text-xs text-rose-300">
                         Delete
                       </button>
                     </div>
@@ -105,13 +97,7 @@ export default function ManageProductsPage() {
           {products.map((product) => (
             <article key={product.id} className="rounded-xl border border-[#d6b36a]/20 bg-[#130e0a] p-4">
               <div className="flex gap-3">
-                <Image
-                  src={product.imageUrl}
-                  alt={product.title}
-                  width={64}
-                  height={64}
-                  className="h-16 w-16 rounded object-cover"
-                />
+                <img src={product.imageUrl} alt={product.title} className="h-16 w-16 rounded object-cover" />
                 <div>
                   <h2 className="font-semibold text-[#f5e6c2]">{product.title}</h2>
                   <p className="text-sm text-[#dccba6]">{product.category}</p>
@@ -131,12 +117,7 @@ export default function ManageProductsPage() {
                 >
                   Edit
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => openDeleteModal(product.id)}
-                  disabled={!product.id.startsWith("custom-")}
-                  className="rounded-md border border-rose-400/40 px-3 py-2 text-xs text-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
-                >
+                <button type="button" onClick={() => openDeleteModal(product.id)} className="rounded-md border border-rose-400/40 px-3 py-2 text-xs text-rose-300">
                   Delete
                 </button>
               </div>

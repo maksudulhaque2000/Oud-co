@@ -4,11 +4,10 @@ import { Product, ProductCategory } from "@/types/product";
 import {
   isValidImageSource,
   normalizeImageSource,
-  createProductImagePreview,
   getProductFormDefaults,
   categories,
 } from "@/lib/products";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { FormEvent, useState } from "react";
 
 type ProductFormValues = {
   title: string;
@@ -45,7 +44,6 @@ export default function ProductForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(isValidImageSource(defaults.imageUrl) ? defaults.imageUrl : "");
-  const [fileName, setFileName] = useState("");
 
   function validate() {
     const nextErrors: Record<string, string> = {};
@@ -65,35 +63,12 @@ export default function ProductForm({
     if (!price || Number(price) <= 0) {
       nextErrors.price = "Price must be greater than 0.";
     }
-    if (!imageUrl.trim()) {
-      nextErrors.imageUrl = "Please upload an image or provide an image URL.";
-    } else if (!isValidImageSource(imageUrl)) {
+    if (imageUrl.trim() && !isValidImageSource(imageUrl)) {
       nextErrors.imageUrl = "Image must be a valid URL or uploaded image file.";
     }
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
-  }
-
-  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    try {
-      const dataUrl = await createProductImagePreview(file);
-      setImageUrl(dataUrl);
-      setPreview(dataUrl);
-      setFileName(file.name);
-      setErrors((current) => {
-        const next = { ...current };
-        delete next.imageUrl;
-        return next;
-      });
-    } catch {
-      setErrors((current) => ({ ...current, imageUrl: "Unable to read the selected image file." }));
-    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -125,30 +100,33 @@ export default function ProductForm({
 
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
         <div>
+          <label className="mb-1 block text-sm font-medium text-[#f0dca7]">Title</label>
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="Title"
+            placeholder="Royal Oud Al-Maliki"
             className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
           />
           {errors.title ? <p className="mt-1 text-xs text-rose-300">{errors.title}</p> : null}
         </div>
 
         <div>
+          <label className="mb-1 block text-sm font-medium text-[#f0dca7]">Short Description</label>
           <input
             value={shortDescription}
             onChange={(event) => setShortDescription(event.target.value)}
-            placeholder="Short Description"
+            placeholder="A rich and deep oud fragrance with a regal signature."
             className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
           />
           {errors.shortDescription ? <p className="mt-1 text-xs text-rose-300">{errors.shortDescription}</p> : null}
         </div>
 
         <div>
+          <label className="mb-1 block text-sm font-medium text-[#f0dca7]">Full Description</label>
           <textarea
             value={fullDescription}
             onChange={(event) => setFullDescription(event.target.value)}
-            placeholder="Full Description"
+            placeholder="Add the full product story, ingredients, scent profile, and usage notes."
             rows={5}
             className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
           />
@@ -157,6 +135,7 @@ export default function ProductForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
+            <label className="mb-1 block text-sm font-medium text-[#f0dca7]">Category</label>
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value as ProductCategory)}
@@ -172,41 +151,39 @@ export default function ProductForm({
           </div>
 
           <div>
+            <label className="mb-1 block text-sm font-medium text-[#f0dca7]">Price (Tk)</label>
             <input
               value={price}
               onChange={(event) => setPrice(event.target.value)}
               type="number"
               min="1"
-              placeholder="Price (Tk)"
+              placeholder="1850"
               className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
             />
             {errors.price ? <p className="mt-1 text-xs text-rose-300">{errors.price}</p> : null}
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-[#f0dca7]">Image URL</label>
           <input
             value={imageUrl}
             onChange={(event) => {
               const nextUrl = event.target.value;
               setImageUrl(nextUrl);
               setPreview(isValidImageSource(nextUrl) ? nextUrl : "");
-              setFileName("");
             }}
-            placeholder="Image URL"
+            placeholder="https://images.unsplash.com/..."
             className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
           />
-          <label className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-[#d6b36a]/40 px-4 py-3 text-sm font-semibold text-[#f0dca7] transition hover:border-[#d6b36a]">
-            Upload Image
-            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-          </label>
+          <p className="mt-1 text-xs text-[#bca475]">Optional. Leave blank to use the default product image.</p>
         </div>
         {errors.imageUrl ? <p className="text-xs text-rose-300">{errors.imageUrl}</p> : null}
 
         {preview ? (
           <div className="overflow-hidden rounded-lg border border-[#d6b36a]/20 bg-[#1c140f]">
             <p className="border-b border-[#d6b36a]/20 px-4 py-2 text-xs text-[#cdb890]">
-              {fileName ? `Uploaded: ${fileName}` : "Image preview"}
+              Image preview
             </p>
             <img src={preview} alt="Preview" className="h-48 w-full object-cover" />
           </div>
