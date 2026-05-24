@@ -20,6 +20,9 @@ const bodyFont = Manrope({
 export const metadata: Metadata = {
   title: "Oud.co | Perfume Oil & Attar",
   description: "Premium perfume oil and attar e-commerce experience.",
+  icons: {
+    icon: "/hero.png",
+  },
 };
 
 export default function RootLayout({

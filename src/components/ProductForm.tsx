@@ -41,9 +41,29 @@ export default function ProductForm({
   const [category, setCategory] = useState<ProductCategory>(defaults.category);
   const [price, setPrice] = useState(defaults.price);
   const [imageUrl, setImageUrl] = useState(defaults.imageUrl);
+  const [uploadedImage, setUploadedImage] = useState("");
+  const [uploadedImageName, setUploadedImageName] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState(isValidImageSource(defaults.imageUrl) ? defaults.imageUrl : "");
+  const previewSource = uploadedImage || imageUrl;
+  const preview = isValidImageSource(previewSource) ? previewSource : "";
+
+  function readFileAsDataUrl(file: File) {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        resolve(String(reader.result || ""));
+      };
+
+      reader.onerror = () => {
+        reject(new Error("Unable to read the selected image file."));
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
 
   function validate() {
     const nextErrors: Record<string, string> = {};
@@ -78,6 +98,14 @@ export default function ProductForm({
       return;
     }
 
+    if (uploadingImage) {
+      setErrors((current) => ({
+        ...current,
+        imageUrl: "Please wait for the image upload to finish.",
+      }));
+      return;
+    }
+
     try {
       setLoading(true);
       await onSubmit({
@@ -86,7 +114,7 @@ export default function ProductForm({
         fullDescription: fullDescription.trim(),
         category,
         price: Number(price),
-        imageUrl: normalizeImageSource(imageUrl),
+        imageUrl: normalizeImageSource(uploadedImage || imageUrl),
       });
     } finally {
       setLoading(false);
@@ -171,12 +199,78 @@ export default function ProductForm({
             onChange={(event) => {
               const nextUrl = event.target.value;
               setImageUrl(nextUrl);
-              setPreview(isValidImageSource(nextUrl) ? nextUrl : "");
+              if (uploadedImage) {
+                setUploadedImage("");
+                setUploadedImageName("");
+              }
             }}
             placeholder="https://images.unsplash.com/..."
             className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
           />
-          <p className="mt-1 text-xs text-[#bca475]">Optional. Leave blank to use the default product image.</p>
+          <p className="mt-1 text-xs text-[#bca475]">Optional. Leave blank or upload a local image file instead.</p>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-[#f0dca7]">Upload Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (event) => {
+              const file = event.target.files?.[0] || null;
+
+              if (!file) {
+                setUploadedImage("");
+                setUploadedImageName("");
+                return;
+              }
+
+              if (!file.type.startsWith("image/")) {
+                setErrors((current) => ({
+                  ...current,
+                  imageUrl: "Please select a valid image file.",
+                }));
+                event.target.value = "";
+                return;
+              }
+
+              try {
+                setUploadingImage(true);
+                const dataUrl = await readFileAsDataUrl(file);
+                setUploadedImage(dataUrl);
+                setUploadedImageName(file.name);
+                setImageUrl("");
+                setErrors((current) => {
+                  const nextErrors = { ...current };
+                  delete nextErrors.imageUrl;
+                  return nextErrors;
+                });
+              } catch (error) {
+                setErrors((current) => ({
+                  ...current,
+                  imageUrl: error instanceof Error ? error.message : "Unable to upload the selected image.",
+                }));
+                event.target.value = "";
+              } finally {
+                setUploadingImage(false);
+              }
+            }}
+            className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-sm text-[#f8ecd0] outline-none ring-[#c9a84c] file:mr-4 file:rounded-md file:border-0 file:bg-[#c9a84c] file:px-3 file:py-2 file:font-semibold file:text-[#1f1300] hover:file:bg-[#d8b760] focus:ring-2"
+          />
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#bca475]">
+            <span>Optional. Supports JPG, PNG, WEBP, GIF, and other browser-supported image files.</span>
+            {uploadedImageName ? <span className="rounded-full border border-[#d6b36a]/20 bg-[#1b140f] px-2 py-1 text-[#d8c59b]">Selected: {uploadedImageName}</span> : null}
+          </div>
+          {uploadedImage ? (
+            <button
+              type="button"
+              onClick={() => {
+                setUploadedImage("");
+                setUploadedImageName("");
+              }}
+              className="mt-2 text-xs font-semibold text-[#eecf8b] underline decoration-[#eecf8b]/60 underline-offset-4"
+            >
+              Remove uploaded image
+            </button>
+          ) : null}
         </div>
         {errors.imageUrl ? <p className="text-xs text-rose-300">{errors.imageUrl}</p> : null}
 
@@ -191,10 +285,10 @@ export default function ProductForm({
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || uploadingImage}
           className="rounded-lg bg-[#c9a84c] px-5 py-3 font-semibold text-[#1f1300] transition hover:bg-[#d8b760] disabled:opacity-60"
         >
-          {loading ? "Saving..." : submitLabel}
+          {loading ? "Saving..." : uploadingImage ? "Uploading..." : submitLabel}
         </button>
       </form>
     </section>
