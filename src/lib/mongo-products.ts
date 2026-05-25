@@ -16,6 +16,22 @@ function toProduct(document: ProductDocument): Product {
   });
 }
 
+function clampPercent(value: unknown) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.min(100, value));
+}
+
+function clampAmount(value: unknown) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(0, value);
+}
+
 async function getProductsCollection(): Promise<Collection<ProductDocument>> {
   const db = await getMongoDb();
   return db.collection<ProductDocument>(COLLECTION_NAME);
@@ -35,7 +51,24 @@ export async function getProduct(id: string) {
 
 export type ProductInput = Pick<
   Product,
-  "id" | "title" | "shortDescription" | "fullDescription" | "category" | "price" | "imageUrl" | "rating" | "volume" | "origin" | "longevity" | "notes"
+  | "id"
+  | "title"
+  | "shortDescription"
+  | "fullDescription"
+  | "category"
+  | "price"
+  | "imageUrl"
+  | "rating"
+  | "volume"
+  | "origin"
+  | "longevity"
+  | "notes"
+  | "vatPercent"
+  | "discountPercent"
+  | "shippingCharge"
+  | "publishedByAdminEmail"
+  | "publishedByAdminUid"
+  | "publishedByAdminName"
 > & {
   createdAt?: string;
   updatedAt?: string;
@@ -47,6 +80,9 @@ export async function createProduct(input: ProductInput) {
   const product: ProductDocument = sanitizeProductImage({
     ...input,
     id: input.id || randomUUID(),
+    vatPercent: clampPercent(input.vatPercent),
+    discountPercent: clampPercent(input.discountPercent),
+    shippingCharge: clampAmount(input.shippingCharge),
     createdAt: input.createdAt ?? now,
     updatedAt: input.updatedAt ?? now,
   }) as ProductDocument;
@@ -67,6 +103,9 @@ export async function updateProduct(id: string, input: ProductInput) {
       ...(existing ?? ({} as Product)),
       ...input,
       id,
+      vatPercent: clampPercent(input.vatPercent),
+      discountPercent: clampPercent(input.discountPercent),
+      shippingCharge: clampAmount(input.shippingCharge),
       createdAt: existing?.createdAt ?? input.createdAt ?? now,
       updatedAt: input.updatedAt ?? now,
     }),

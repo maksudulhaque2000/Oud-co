@@ -16,6 +16,9 @@ type ProductFormValues = {
   category: ProductCategory;
   price: number;
   imageUrl: string;
+  vatPercent: number;
+  discountPercent: number;
+  shippingCharge: number;
 };
 
 type Props = {
@@ -41,6 +44,9 @@ export default function ProductForm({
   const [category, setCategory] = useState<ProductCategory>(defaults.category);
   const [price, setPrice] = useState(defaults.price);
   const [imageUrl, setImageUrl] = useState(defaults.imageUrl);
+  const [vatPercent, setVatPercent] = useState(defaults.vatPercent);
+  const [discountPercent, setDiscountPercent] = useState(defaults.discountPercent);
+  const [shippingCharge, setShippingCharge] = useState(defaults.shippingCharge);
   const [uploadedImage, setUploadedImage] = useState("");
   const [uploadedImageName, setUploadedImageName] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -83,6 +89,15 @@ export default function ProductForm({
     if (!price || Number(price) <= 0) {
       nextErrors.price = "Price must be greater than 0.";
     }
+    if (Number(vatPercent) < 0) {
+      nextErrors.vatPercent = "VAT percentage cannot be negative.";
+    }
+    if (Number(discountPercent) < 0) {
+      nextErrors.discountPercent = "Discount percentage cannot be negative.";
+    }
+    if (Number(shippingCharge) < 0) {
+      nextErrors.shippingCharge = "Shipping charge cannot be negative.";
+    }
     if (imageUrl.trim() && !isValidImageSource(imageUrl)) {
       nextErrors.imageUrl = "Image must be a valid URL or uploaded image file.";
     }
@@ -115,6 +130,9 @@ export default function ProductForm({
         category,
         price: Number(price),
         imageUrl: normalizeImageSource(uploadedImage || imageUrl),
+        vatPercent: Number(vatPercent),
+        discountPercent: Number(discountPercent),
+        shippingCharge: Number(shippingCharge),
       });
     } finally {
       setLoading(false);
@@ -189,6 +207,48 @@ export default function ProductForm({
               className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
             />
             {errors.price ? <p className="mt-1 text-xs text-rose-300">{errors.price}</p> : null}
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#f0dca7]">VAT %</label>
+            <input
+              value={vatPercent}
+              onChange={(event) => setVatPercent(event.target.value)}
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0"
+              className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
+            />
+            {errors.vatPercent ? <p className="mt-1 text-xs text-rose-300">{errors.vatPercent}</p> : null}
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#f0dca7]">Discount %</label>
+            <input
+              value={discountPercent}
+              onChange={(event) => setDiscountPercent(event.target.value)}
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0"
+              className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
+            />
+            {errors.discountPercent ? <p className="mt-1 text-xs text-rose-300">{errors.discountPercent}</p> : null}
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#f0dca7]">Shipping Charge (BDT)</label>
+            <input
+              value={shippingCharge}
+              onChange={(event) => setShippingCharge(event.target.value)}
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0"
+              className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] placeholder:text-[#a89267] focus:ring-2"
+            />
+            {errors.shippingCharge ? <p className="mt-1 text-xs text-rose-300">{errors.shippingCharge}</p> : null}
           </div>
         </div>
 

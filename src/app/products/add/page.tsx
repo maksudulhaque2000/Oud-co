@@ -2,6 +2,7 @@
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ProductForm from "@/components/ProductForm";
+import { useAuth } from "@/context/AuthContext";
 import { useProducts } from "@/context/ProductsContext";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
@@ -10,6 +11,7 @@ export default function AddProductPage() {
   const router = useRouter();
   const { pushToast } = useToast();
   const { addProduct } = useProducts();
+  const { user } = useAuth();
 
   return (
     <ProtectedRoute requireAdmin>
@@ -20,7 +22,12 @@ export default function AddProductPage() {
           submitLabel="Save Product"
           onSubmit={async (values) => {
             try {
-              await addProduct(values);
+              await addProduct({
+                ...values,
+                publishedByAdminEmail: user?.email || undefined,
+                publishedByAdminUid: user?.uid || undefined,
+                publishedByAdminName: user?.displayName || undefined,
+              });
               pushToast({
                 title: "Product Added",
                 message: "New product has been published to the database.",

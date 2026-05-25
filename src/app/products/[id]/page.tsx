@@ -1,13 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
+import { useCart } from "@/context/CartContext";
 import { normalizeImageSource } from "@/lib/products";
 import { useProducts } from "@/context/ProductsContext";
+import { useToast } from "@/context/ToastContext";
 
 export default function ProductDetailsPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const { addToCart } = useCart();
+  const { pushToast } = useToast();
   const { products, loading, error } = useProducts();
   const product = products.find((item) => item.id === params.id);
 
@@ -55,6 +61,43 @@ export default function ProductDetailsPage() {
             <p>Notes: {product.notes}</p>
             <p>Origin: {product.origin}</p>
             <p>Longevity: {product.longevity}</p>
+            {product.publishedByAdminName || product.publishedByAdminEmail ? (
+              <p>
+                Published by: {product.publishedByAdminName || product.publishedByAdminEmail}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                addToCart(product, 1);
+                pushToast({
+                  title: "Added to cart",
+                  message: `${product.title} is ready in your cart.`,
+                  variant: "success",
+                });
+              }}
+              className="rounded-md border border-[#d6b36a]/40 px-4 py-3 font-semibold text-[#f0dca7] transition hover:border-[#d6b36a]"
+            >
+              Add to Cart
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                addToCart(product, 1);
+                pushToast({
+                  title: "Proceeding to checkout",
+                  message: "Your item has been moved to checkout.",
+                  variant: "success",
+                });
+                router.push("/checkout");
+              }}
+              className="rounded-md bg-[#c9a84c] px-4 py-3 font-semibold text-[#1f1300] transition hover:bg-[#d8b760]"
+            >
+              Buy Now
+            </button>
           </div>
         </div>
       </section>

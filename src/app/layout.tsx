@@ -1,21 +1,11 @@
 import type { Metadata } from "next";
-import { Cinzel, Manrope } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
 import { ProductsProvider } from "@/context/ProductsContext";
 import { ToastProvider } from "@/context/ToastContext";
-
-const headingFont = Cinzel({
-  variable: "--font-heading",
-  subsets: ["latin"],
-});
-
-const bodyFont = Manrope({
-  variable: "--font-body",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Oud.co | Perfume Oil & Attar",
@@ -31,17 +21,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${headingFont.variable} ${bodyFont.variable} h-full antialiased`}>
+    <html lang="en" className="h-full antialiased">
       <body className="min-h-full">
         <AuthProvider>
           <ProductsProvider>
-            <ToastProvider>
-              <div className="app-shell">
-                <Navbar />
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
-            </ToastProvider>
+            <CartProvider>
+              <ToastProvider>
+                <div className="app-shell">
+                  <Navbar />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+              </ToastProvider>
+            </CartProvider>
           </ProductsProvider>
         </AuthProvider>
       </body>

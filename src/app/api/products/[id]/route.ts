@@ -9,6 +9,10 @@ function isNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value);
 }
 
+function toNumber(value: unknown, fallback = 0): number {
+  return isNumber(value) ? (value as number) : fallback;
+}
+
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -38,6 +42,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const origin = body?.origin;
     const longevity = body?.longevity;
     const notes = body?.notes;
+    const vatPercent = body?.vatPercent;
+    const discountPercent = body?.discountPercent;
+    const shippingCharge = body?.shippingCharge;
+    const publishedByAdminEmail = body?.publishedByAdminEmail;
+    const publishedByAdminUid = body?.publishedByAdminUid;
+    const publishedByAdminName = body?.publishedByAdminName;
     const createdAt = body?.createdAt;
     const updatedAt = body?.updatedAt;
 
@@ -46,7 +56,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const validPrice: number = price as number;
-    const validRating: number = isNumber(rating) ? (rating as number) : 4.5;
+    const validRating: number = toNumber(rating, 4.5);
+    const validVatPercent: number = toNumber(vatPercent);
+    const validDiscountPercent: number = toNumber(discountPercent);
+    const validShippingCharge: number = toNumber(shippingCharge);
 
     const product = await updateProduct(id, {
       id,
@@ -61,6 +74,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       origin: isString(origin) ? origin : "Bangladesh",
       longevity: isString(longevity) ? longevity : "8-10 hours",
       notes: isString(notes) ? notes : "Custom blend",
+      vatPercent: validVatPercent,
+      discountPercent: validDiscountPercent,
+      shippingCharge: validShippingCharge,
+      publishedByAdminEmail: isString(publishedByAdminEmail) ? publishedByAdminEmail : undefined,
+      publishedByAdminUid: isString(publishedByAdminUid) ? publishedByAdminUid : undefined,
+      publishedByAdminName: isString(publishedByAdminName) ? publishedByAdminName : undefined,
       createdAt: isString(createdAt) ? createdAt : undefined,
       updatedAt: isString(updatedAt) ? updatedAt : undefined,
     });

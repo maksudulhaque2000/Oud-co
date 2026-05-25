@@ -5,6 +5,8 @@
   --foreground: #f5e6c2;
   --card: #16100b;
   --accent: #c9a84c;
+  --font-heading: "Georgia", "Times New Roman", serif;
+  --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 @theme inline {

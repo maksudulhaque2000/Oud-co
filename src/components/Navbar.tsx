@@ -9,6 +9,8 @@ import { useAuth } from "@/context/AuthContext";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
+  { href: "/cart", label: "Cart" },
+  { href: "/orders", label: "Orders" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -67,7 +69,7 @@ export default function Navbar() {
                 className="flex items-center gap-2 rounded-md border border-[#d6b36a]/40 px-3 py-2 text-[#f0dca7] hover:border-[#d6b36a]"
               >
                 <UserCircle2 size={18} />
-                <span className="max-w-[160px] truncate text-sm">
+                <span className="max-w-40 truncate text-sm">
                   {user?.displayName || user?.email}
                 </span>
               </button>

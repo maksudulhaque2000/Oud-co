@@ -179,7 +179,7 @@ export default function ContactPage() {
               <Phone size={18} className="mt-0.5 text-[#eecf8b]" />
               <div>
                 <p className="font-semibold text-[#f5e6c2]">Phone</p>
-                <p>+880 1700-000000</p>
+                <p>+880 1518-474975</p>
               </div>
             </div>
 

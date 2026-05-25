@@ -36,6 +36,9 @@ export function sanitizeProductImage(product: Product): Product {
   return {
     ...product,
     imageUrl: normalizeImageSource(product.imageUrl),
+    vatPercent: product.vatPercent ?? 0,
+    discountPercent: product.discountPercent ?? 0,
+    shippingCharge: product.shippingCharge ?? 0,
   };
 }
 
@@ -47,6 +50,9 @@ export function getProductFormDefaults(product?: Product | null) {
     category: product?.category ?? categories[0],
     price: product ? String(product.price) : "",
     imageUrl: product?.imageUrl ?? "",
+    vatPercent: product ? String(product.vatPercent) : "0",
+    discountPercent: product ? String(product.discountPercent) : "0",
+    shippingCharge: product ? String(product.shippingCharge) : "0",
   };
 }
 
@@ -84,8 +90,14 @@ function createEmptyProduct(input: NewProductInput, id: string): Product {
     origin: "Bangladesh",
     longevity: "8-10 hours",
     notes: "Custom blend",
+    vatPercent: 0,
+    discountPercent: 0,
+    shippingCharge: 0,
     createdAt: now,
     updatedAt: now,
+    publishedByAdminEmail: input.publishedByAdminEmail,
+    publishedByAdminUid: input.publishedByAdminUid,
+    publishedByAdminName: input.publishedByAdminName,
   };
 }
 

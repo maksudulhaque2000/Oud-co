@@ -52,6 +52,9 @@ export default function EditProductPage() {
                 category: values.category,
                 price: values.price,
                 imageUrl: values.imageUrl,
+                vatPercent: values.vatPercent,
+                discountPercent: values.discountPercent,
+                shippingCharge: values.shippingCharge,
               });
               pushToast({
                 title: "Product Updated",

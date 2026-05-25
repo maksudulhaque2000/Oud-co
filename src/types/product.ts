@@ -13,8 +13,14 @@ export type Product = {
   origin: string;
   longevity: string;
   notes: string;
+  vatPercent: number;
+  discountPercent: number;
+  shippingCharge: number;
   createdAt?: string;
   updatedAt?: string;
+  publishedByAdminEmail?: string;
+  publishedByAdminUid?: string;
+  publishedByAdminName?: string;
 };
 
 export type NewProductInput = {
@@ -24,4 +30,10 @@ export type NewProductInput = {
   category: ProductCategory;
   price: number;
   imageUrl?: string;
+  vatPercent: number;
+  discountPercent: number;
+  shippingCharge: number;
+  publishedByAdminEmail?: string;
+  publishedByAdminUid?: string;
+  publishedByAdminName?: string;
 };
