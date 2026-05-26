@@ -89,6 +89,21 @@ export async function listOrders() {
   return orders.map(toOrder);
 }
 
+export async function listOrdersByDateRange(startIso: string, endIso: string) {
+  const collection = await getOrdersCollection();
+  const orders = await collection
+    .find({
+      createdAt: {
+        $gte: startIso,
+        $lte: endIso,
+      },
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  return orders.map(toOrder);
+}
+
 export async function listOrdersByCustomerEmail(email: string) {
   const collection = await getOrdersCollection();
   const nextEmail = email.trim().toLowerCase();

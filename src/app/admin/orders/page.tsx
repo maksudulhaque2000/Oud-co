@@ -82,7 +82,8 @@ export default function AdminOrdersPage() {
 
     async function loadOrders() {
       try {
-        const nextOrders = await fetchOrders(role === "admin" ? undefined : user?.email);
+        const customerEmail = role === "admin" ? undefined : user?.email ?? undefined;
+        const nextOrders = await fetchOrders(customerEmail);
         if (!active) {
           return;
         }
@@ -113,6 +114,16 @@ export default function AdminOrdersPage() {
   }, [role, user?.email]);
 
   const visibleOrders = useMemo(() => orders, [orders]);
+
+  const invoiceDownloadBase = "/api/admin/orders/invoice";
+
+  function invoiceHref(orderId: string) {
+    return `${invoiceDownloadBase}?orderId=${encodeURIComponent(orderId)}`;
+  }
+
+  function batchInvoiceHref(preset: "today" | "month" | "year") {
+    return `${invoiceDownloadBase}?preset=${preset}`;
+  }
 
   async function saveOrder(orderId: string) {
     const draft = drafts[orderId];
@@ -145,6 +156,26 @@ export default function AdminOrdersPage() {
       <main className="mx-auto w-full max-w-7xl px-4 py-12 md:px-6">
         <h1 className="text-3xl font-bold text-[#f5e6c2]">Manage Orders</h1>
         <p className="mt-2 text-sm text-[#dccba6]">Update order and payment status from one place.</p>
+
+        <section className="mt-6 rounded-2xl border border-[#d6b36a]/20 bg-[#130e0a] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#d6b36a]">Invoice Export</h2>
+              <p className="mt-1 text-sm text-[#dccba6]">Download single order invoices or batch exports for packing slips.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <a href={batchInvoiceHref("today")} className="rounded-md border border-[#d6b36a]/30 px-3 py-2 text-sm font-semibold text-[#f8ecd0] transition hover:bg-[#2a1d12]">
+                Today
+              </a>
+              <a href={batchInvoiceHref("month")} className="rounded-md border border-[#d6b36a]/30 px-3 py-2 text-sm font-semibold text-[#f8ecd0] transition hover:bg-[#2a1d12]">
+                Last 1 Month
+              </a>
+              <a href={batchInvoiceHref("year")} className="rounded-md border border-[#d6b36a]/30 px-3 py-2 text-sm font-semibold text-[#f8ecd0] transition hover:bg-[#2a1d12]">
+                Last 1 Year
+              </a>
+            </div>
+          </div>
+        </section>
 
         {error ? <p className="mt-4 rounded-lg border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</p> : null}
 
@@ -239,14 +270,22 @@ export default function AdminOrdersPage() {
                             <span className="text-xs text-[#a89267]">
                               {formatFulfillmentLabel(draft.status)} / {formatLabel(draft.paymentStatus)}
                             </span>
-                            <button
-                              type="button"
-                              onClick={() => void saveOrder(order.id)}
-                              disabled={savingId === order.id || !dirty}
-                              className="rounded-md bg-[#c9a84c] px-4 py-2 text-sm font-semibold text-[#1f1300] transition disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {savingId === order.id ? "Saving..." : "Save"}
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={invoiceHref(order.id)}
+                                className="rounded-md border border-[#d6b36a]/30 px-3 py-2 text-sm font-semibold text-[#f8ecd0] transition hover:bg-[#2a1d12]"
+                              >
+                                PDF
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => void saveOrder(order.id)}
+                                disabled={savingId === order.id || !dirty}
+                                className="rounded-md bg-[#c9a84c] px-4 py-2 text-sm font-semibold text-[#1f1300] transition disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {savingId === order.id ? "Saving..." : "Save"}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </td>
