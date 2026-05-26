@@ -1,13 +1,14 @@
 import { Suspense } from "react";
 import PaymentSuccessClient from "./PaymentSuccessClient";
 
-export default function PaymentSuccessPage({
+export default async function PaymentSuccessPage({
   searchParams,
 }: Readonly<{
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }>) {
-  const orderId = typeof searchParams?.orderId === "string" ? searchParams.orderId : "";
-  const valId = typeof searchParams?.val_id === "string" ? searchParams.val_id : "";
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const orderId = typeof resolvedSearchParams.orderId === "string" ? resolvedSearchParams.orderId : "";
+  const valId = typeof resolvedSearchParams.val_id === "string" ? resolvedSearchParams.val_id : "";
 
   return (
     <main className="mx-auto flex min-h-[70vh] w-full max-w-3xl items-center px-4 py-12 md:px-6">
