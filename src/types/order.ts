@@ -10,6 +10,7 @@ export type OrderCustomer = {
   name: string;
   phone: string;
   email: string;
+  address: string;
 };
 
 export type OrderItem = {
@@ -62,6 +63,6 @@ export type CreateOrderInput = {
   customer: OrderCustomer;
   items: OrderItem[];
   paymentMethod: PaymentMethod;
-  shippingMethod: ShippingMethod;
+  shippingMethod?: ShippingMethod;
   notes?: string;
 };

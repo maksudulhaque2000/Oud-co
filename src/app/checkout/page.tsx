@@ -10,13 +10,9 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import { useToast } from "@/context/ToastContext";
 
-const paymentMethods: Array<{ value: PaymentMethod; label: string; description: string; enabled: boolean }> = [
-  { value: "sslcommerz", label: "SSLCommerz", description: "Online cards, mobile banking, and bank payment gateway.", enabled: true },
-  { value: "bkash", label: "bKash", description: "Coming soon.", enabled: false },
-  { value: "nagad", label: "Nagad", description: "Coming soon.", enabled: false },
-  { value: "stripe", label: "Stripe", description: "Coming soon.", enabled: false },
-  { value: "prepayment", label: "Prepayment", description: "Manual bank transfer or support-assisted payment.", enabled: true },
-  { value: "cash_on_delivery", label: "Cash on Delivery", description: "Pay when the order is delivered.", enabled: true },
+const paymentMethods: Array<{ value: PaymentMethod; label: string }> = [
+  { value: "cash_on_delivery", label: "Cash on Delivery" },
+  { value: "sslcommerz", label: "Pay Now (Online Payment)" },
 ];
 
 export default function CheckoutPage() {
@@ -25,8 +21,8 @@ export default function CheckoutPage() {
   const { pushToast } = useToast();
   const router = useRouter();
   const [phone, setPhone] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("sslcommerz");
-  const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash_on_delivery");
+  const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
 
   const customerName = user?.displayName?.trim() || user?.email?.trim() || "Customer";
@@ -84,14 +80,17 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!address.trim()) {
+      pushToast({ title: "Delivery address required", message: "Please provide your full delivery address.", variant: "error" });
+      return;
+    }
+
     try {
       setLoading(true);
       const order = await createOrder({
-        customer: { name: customerName, phone: phone.trim(), email: customerEmail },
+        customer: { name: customerName, phone: phone.trim(), email: customerEmail, address: address.trim() },
         items: orderItems,
         paymentMethod,
-        shippingMethod: "home_delivery",
-        notes: notes.trim() || undefined,
       });
 
       if (paymentMethod === "sslcommerz") {
@@ -127,7 +126,7 @@ export default function CheckoutPage() {
     <ProtectedRoute>
       <main className="mx-auto w-full max-w-6xl px-4 py-12 md:px-6">
         <h1 className="text-3xl font-bold text-[#f5e6c2]">Checkout</h1>
-        <p className="mt-2 text-sm text-[#dccba6]">Review your cart and complete the order with SSLCommerz or an offline payment method.</p>
+        <p className="mt-2 text-sm text-[#dccba6]">Choose either Cash on Delivery or Pay Now with SSLCommerz to complete your order.</p>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-[#d6b36a]/20 bg-[#130e0a] p-6 md:p-8">
@@ -155,29 +154,32 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div>
               <div>
                 <label className="mb-1 block text-sm text-[#f0dca7]">Payment Method</label>
                 <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)} className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] focus:ring-2">
-                  {paymentMethods.filter((method) => method.enabled).map((method) => (
+                  {paymentMethods.map((method) => (
                     <option key={method.value} value={method.value}>{method.label}</option>
                   ))}
                 </select>
-                <p className="mt-1 text-xs text-[#bca475]">Only SSLCommerz is fully online right now. Other gateways can be added next.</p>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm text-[#f0dca7]">Shipping Method</label>
-                <input value="Home Delivery" readOnly className="w-full rounded-lg border border-[#d6b36a]/20 bg-[#1a120b] px-4 py-3 text-[#cdb890] outline-none" />
+                <p className="mt-1 text-xs text-[#bca475]">You can place order with Cash on Delivery or pay now using SSLCommerz.</p>
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-[#f0dca7]">Order Notes</label>
-              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] focus:ring-2" />
+              <label className="mb-1 block text-sm text-[#f0dca7]">Delivery Address</label>
+              <textarea
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                rows={4}
+                required
+                placeholder="Enter the full address where you want to receive your order"
+                className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] focus:ring-2"
+              />
             </div>
 
             <button type="submit" disabled={loading} className="rounded-lg bg-[#c9a84c] px-5 py-3 font-semibold text-[#1f1300] transition hover:bg-[#d8b760] disabled:opacity-60">
-              {loading ? "Processing..." : paymentMethod === "sslcommerz" ? "Pay with SSLCommerz" : "Place Order"}
+              {loading ? "Processing..." : paymentMethod === "sslcommerz" ? "Pay Now" : "Place Cash on Delivery Order"}
             </button>
           </form>
 

@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, UserCircle2, X } from "lucide-react";
+import { ClipboardList, Menu, ShoppingCart, UserCircle2, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
-  { href: "/cart", label: "Cart" },
-  { href: "/orders", label: "Orders" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -18,6 +17,7 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const { user, logout, loading, canManageProducts, canManageUsers, role } = useAuth();
+  const { itemCount } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -46,6 +46,38 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <div className="flex items-center gap-2 rounded-full border border-[#d6b36a]/20 bg-[#1a120b]/80 p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.16)]">
+            <Link
+              href="/cart"
+              title="Cart"
+              aria-label="Open cart"
+              className={`relative flex h-10 w-10 items-center justify-center rounded-full transition ${
+                pathname === "/cart"
+                  ? "bg-[#c9a84c] text-[#1f1300]"
+                  : "text-[#f0dca7] hover:bg-[#2a1d12] hover:text-white"
+              }`}
+            >
+              <ShoppingCart size={18} />
+              {itemCount > 0 ? (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d6b36a] px-1 text-[10px] font-bold text-[#1f1300]">
+                  {itemCount > 9 ? "9+" : itemCount}
+                </span>
+              ) : null}
+            </Link>
+            <Link
+              href="/orders"
+              title="Orders"
+              aria-label="Open orders"
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition ${
+                pathname === "/orders"
+                  ? "bg-[#c9a84c] text-[#1f1300]"
+                  : "text-[#f0dca7] hover:bg-[#2a1d12] hover:text-white"
+              }`}
+            >
+              <ClipboardList size={18} />
+            </Link>
+          </div>
+
           {!loading && !user ? (
             <>
               <Link
@@ -136,6 +168,33 @@ export default function Navbar() {
 
       {mobileOpen ? (
         <div className="border-t border-[#d6b36a]/20 bg-[#120d08] px-4 py-4 md:hidden">
+          <div className="mb-4 flex items-center gap-2">
+            <Link
+              href="/cart"
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm transition ${
+                pathname === "/cart"
+                  ? "border-[#d6b36a] bg-[#2a1d12] text-[#f8ecd0]"
+                  : "border-[#d6b36a]/20 text-[#eadfc3] hover:bg-[#2a1d12]"
+              }`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <ShoppingCart size={16} />
+              Cart{itemCount > 0 ? ` (${itemCount})` : ""}
+            </Link>
+            <Link
+              href="/orders"
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm transition ${
+                pathname === "/orders"
+                  ? "border-[#d6b36a] bg-[#2a1d12] text-[#f8ecd0]"
+                  : "border-[#d6b36a]/20 text-[#eadfc3] hover:bg-[#2a1d12]"
+              }`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <ClipboardList size={16} />
+              Orders
+            </Link>
+          </div>
+
           <div className="space-y-2">
             {navLinks.map((link) => (
               <Link

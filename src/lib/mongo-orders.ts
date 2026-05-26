@@ -111,8 +111,8 @@ export async function createOrder(input: CreateOrderInput) {
     throw new Error("At least one order item is required.");
   }
 
-  if (!input.customer.name.trim() || !input.customer.phone.trim() || !input.customer.email.trim()) {
-    throw new Error("Customer name, phone, and email are required.");
+  if (!input.customer.name.trim() || !input.customer.phone.trim() || !input.customer.email.trim() || !input.customer.address.trim()) {
+    throw new Error("Customer name, phone, email, and address are required.");
   }
 
   const totals = computeTotals(items);
@@ -124,10 +124,11 @@ export async function createOrder(input: CreateOrderInput) {
       name: input.customer.name.trim(),
       phone: input.customer.phone.trim(),
       email: input.customer.email.trim().toLowerCase(),
+      address: input.customer.address.trim(),
     },
     items,
     paymentMethod: input.paymentMethod,
-    shippingMethod: "home_delivery",
+    shippingMethod: input.shippingMethod ?? "home_delivery",
     status: "pending",
     paymentStatus: "pending",
     notes: input.notes?.trim() || undefined,

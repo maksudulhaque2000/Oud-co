@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     const defaultState = "Dhaka";
     const defaultPostcode = "1207";
     const defaultCountry = "Bangladesh";
-    const defaultAddress = "Dhaka";
+    const defaultAddress = order.customer.address?.trim() || "Dhaka";
     const totalAmount = order.total.toFixed(2);
     const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
 

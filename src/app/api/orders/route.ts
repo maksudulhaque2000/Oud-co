@@ -38,11 +38,11 @@ export async function POST(request: Request) {
       !isString(body.customer.name) ||
       !isString(body.customer.phone) ||
       !isString(body.customer.email) ||
+      !isString(body.customer.address) ||
       !Array.isArray(body.items) ||
       body.items.length === 0 ||
       body.items.some((item) => !isItem(item)) ||
-      !isString(body.paymentMethod) ||
-      !isString(body.shippingMethod)
+      !isString(body.paymentMethod)
     ) {
       return NextResponse.json({ error: "Invalid order payload." }, { status: 400 });
     }
@@ -51,7 +51,9 @@ export async function POST(request: Request) {
       customer: body.customer,
       items: body.items,
       paymentMethod: body.paymentMethod as CreateOrderInput["paymentMethod"],
-      shippingMethod: body.shippingMethod as CreateOrderInput["shippingMethod"],
+      shippingMethod: isString(body.shippingMethod)
+        ? (body.shippingMethod as CreateOrderInput["shippingMethod"])
+        : undefined,
       notes: isString(body.notes) ? body.notes : undefined,
     });
 

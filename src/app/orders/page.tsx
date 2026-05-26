@@ -86,6 +86,7 @@ export default function OrdersPage() {
                       <div className="font-medium text-[#f8ecd0]">{order.customer.name}</div>
                       <div className="text-xs">{order.customer.phone}</div>
                       <div className="text-xs">{order.customer.email}</div>
+                      <div className="text-xs text-[#a89267]">{order.customer.address || "Address not provided"}</div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
