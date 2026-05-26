@@ -7,8 +7,22 @@ import { fetchOrders, updateOrderStatus } from "@/lib/orders";
 import type { Order, OrderStatus, PaymentStatus } from "@/types/order";
 import { useEffect, useMemo, useState } from "react";
 
-const orderStatuses: OrderStatus[] = ["pending", "paid", "processing", "shipped", "delivered", "canceled", "refunded"];
-const paymentStatuses: PaymentStatus[] = ["pending", "paid", "failed", "refunded"];
+const fulfillmentStatuses: Array<{ value: OrderStatus; label: string }> = [
+  { value: "pending", label: "Pending" },
+  { value: "processing", label: "Processing" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "canceled", label: "Canceled" },
+  { value: "refunded", label: "Refunded" },
+  { value: "paid", label: "Paid (Legacy)" },
+];
+
+const paymentStatuses: Array<{ value: PaymentStatus; label: string }> = [
+  { value: "pending", label: "Pending" },
+  { value: "paid", label: "Paid" },
+  { value: "failed", label: "Failed" },
+  { value: "refunded", label: "Refunded" },
+];
 
 function formatLabel(value: string) {
   return value.replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
@@ -48,6 +62,10 @@ function paymentBadgeClass(status: PaymentStatus) {
 
 function paymentMethodLabel(value: string) {
   return value === "cash_on_delivery" ? "Cash on Delivery" : formatLabel(value);
+}
+
+function formatFulfillmentLabel(value: OrderStatus) {
+  return value === "paid" ? "Paid (Legacy)" : formatLabel(value);
 }
 
 export default function AdminOrdersPage() {
@@ -176,49 +194,60 @@ export default function AdminOrdersPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <select
-                            value={draft.status}
-                            onChange={(event) =>
-                              setDrafts((current) => ({
-                                ...current,
-                                [order.id]: { ...draft, status: event.target.value as OrderStatus },
-                              }))
-                            }
-                            className="rounded-md border border-[#d6b36a]/30 bg-[#130e0a] px-3 py-2 text-sm text-[#f8ecd0]"
-                          >
-                            {orderStatuses.map((status) => (
-                              <option key={status} value={status}>
-                                {formatLabel(status)}
-                              </option>
-                            ))}
-                          </select>
+                        <div className="grid min-w-[260px] gap-3">
+                          <label className="grid gap-1">
+                            <span className="text-xs uppercase tracking-[0.18em] text-[#a89267]">Fulfillment</span>
+                            <select
+                              value={draft.status}
+                              onChange={(event) =>
+                                setDrafts((current) => ({
+                                  ...current,
+                                  [order.id]: { ...draft, status: event.target.value as OrderStatus },
+                                }))
+                              }
+                              className="rounded-md border border-[#d6b36a]/30 bg-[#130e0a] px-3 py-2 text-sm text-[#f8ecd0]"
+                            >
+                              {fulfillmentStatuses.map((status) => (
+                                <option key={status.value} value={status.value}>
+                                  {status.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
 
-                          <select
-                            value={draft.paymentStatus}
-                            onChange={(event) =>
-                              setDrafts((current) => ({
-                                ...current,
-                                [order.id]: { ...draft, paymentStatus: event.target.value as PaymentStatus },
-                              }))
-                            }
-                            className="rounded-md border border-[#d6b36a]/30 bg-[#130e0a] px-3 py-2 text-sm text-[#f8ecd0]"
-                          >
-                            {paymentStatuses.map((status) => (
-                              <option key={status} value={status}>
-                                {formatLabel(status)}
-                              </option>
-                            ))}
-                          </select>
+                          <label className="grid gap-1">
+                            <span className="text-xs uppercase tracking-[0.18em] text-[#a89267]">Payment</span>
+                            <select
+                              value={draft.paymentStatus}
+                              onChange={(event) =>
+                                setDrafts((current) => ({
+                                  ...current,
+                                  [order.id]: { ...draft, paymentStatus: event.target.value as PaymentStatus },
+                                }))
+                              }
+                              className="rounded-md border border-[#d6b36a]/30 bg-[#130e0a] px-3 py-2 text-sm text-[#f8ecd0]"
+                            >
+                              {paymentStatuses.map((status) => (
+                                <option key={status.value} value={status.value}>
+                                  {status.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
 
-                          <button
-                            type="button"
-                            onClick={() => void saveOrder(order.id)}
-                            disabled={savingId === order.id || !dirty}
-                            className="rounded-md bg-[#c9a84c] px-4 py-2 text-sm font-semibold text-[#1f1300] transition disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {savingId === order.id ? "Saving..." : "Save"}
-                          </button>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs text-[#a89267]">
+                              {formatFulfillmentLabel(draft.status)} / {formatLabel(draft.paymentStatus)}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => void saveOrder(order.id)}
+                              disabled={savingId === order.id || !dirty}
+                              className="rounded-md bg-[#c9a84c] px-4 py-2 text-sm font-semibold text-[#1f1300] transition disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {savingId === order.id ? "Saving..." : "Save"}
+                            </button>
+                          </div>
                         </div>
                       </td>
                     </tr>
