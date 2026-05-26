@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import { Product } from "@/types/product";
 
 type CartItem = {
@@ -19,6 +19,10 @@ type CartContextValue = {
 };
 
 const STORAGE_KEY = "oudco-cart-v1";
+const listeners = new Set<() => void>();
+let cachedRawCart: string | null = null;
+let cachedItems: CartItem[] = [];
+const EMPTY_CART_ITEMS: CartItem[] = [];
 
 function normalizeProduct(product: Product): Product {
   return {
@@ -47,29 +51,63 @@ function calculateItemCount(items: CartItem[]) {
   return items.reduce((sum, item) => sum + item.quantity, 0);
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") {
-      return [];
-    }
-
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const nextItems = JSON.parse(raw) as CartItem[];
-        return Array.isArray(nextItems)
-          ? nextItems.map((item) => ({ ...item, product: normalizeProduct(item.product) }))
-          : [];
-      }
-    } catch {
-      return [];
-    }
+function readCartItems(): CartItem[] {
+  if (typeof window === "undefined") {
     return [];
-  });
+  }
 
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+
+    if (raw === cachedRawCart) {
+      return cachedItems;
+    }
+
+    if (!raw) {
+      cachedRawCart = raw;
+      cachedItems = [];
+      return cachedItems;
+    }
+
+    const nextItems = JSON.parse(raw) as CartItem[];
+    cachedRawCart = raw;
+    cachedItems = Array.isArray(nextItems)
+      ? nextItems.map((item) => ({ ...item, product: normalizeProduct(item.product) }))
+      : [];
+    return cachedItems;
+  } catch {
+    cachedRawCart = null;
+    cachedItems = [];
+    return cachedItems;
+  }
+}
+
+function writeCartItems(nextItems: CartItem[]) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const normalizedItems = nextItems.map((item) => ({ ...item, product: normalizeProduct(item.product) }));
+  const nextRaw = JSON.stringify(normalizedItems);
+  cachedRawCart = nextRaw;
+  cachedItems = normalizedItems;
+  window.localStorage.setItem(STORAGE_KEY, nextRaw);
+  listeners.forEach((listener) => listener());
+}
+
+function updateCartItems(updater: CartItem[] | ((current: CartItem[]) => CartItem[])) {
+  const currentItems = readCartItems();
+  const nextItems = typeof updater === "function" ? updater(currentItems) : updater;
+  writeCartItems(nextItems);
+}
+
+function subscribeCart(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const items = useSyncExternalStore(subscribeCart, readCartItems, () => EMPTY_CART_ITEMS);
 
   const value = useMemo<CartContextValue>(
     () => ({
@@ -79,7 +117,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addToCart(product: Product, quantity = 1) {
         const nextQuantity = clampQuantity(quantity);
         const normalizedProduct = normalizeProduct(product);
-        setItems((current) => {
+        updateCartItems((current) => {
           const existing = current.find((item) => item.product.id === normalizedProduct.id);
 
           if (!existing) {
@@ -92,19 +130,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         });
       },
       removeFromCart(productId: string) {
-        setItems((current) => current.filter((item) => item.product.id !== productId));
+        updateCartItems((current) => current.filter((item) => item.product.id !== productId));
       },
       updateQuantity(productId: string, quantity: number) {
         if (quantity <= 1) {
-          setItems((current) => current.filter((item) => item.product.id !== productId));
+          updateCartItems((current) => current.filter((item) => item.product.id !== productId));
           return;
         }
 
         const nextQuantity = clampQuantity(quantity);
-        setItems((current) => current.map((item) => (item.product.id === productId ? { ...item, quantity: nextQuantity } : item)));
+        updateCartItems((current) => current.map((item) => (item.product.id === productId ? { ...item, quantity: nextQuantity } : item)));
       },
       clearCart() {
-        setItems([]);
+        writeCartItems([]);
       },
     }),
     [items],

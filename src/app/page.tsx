@@ -56,6 +56,7 @@ export default function Home() {
               alt="Luxury attar bottles"
               width={1200}
               height={800}
+              loading="eager"
               className="h-full w-full rounded-2xl object-cover"
             />
           </div>
@@ -134,7 +135,7 @@ export default function Home() {
       </section>
 
       <section className="mx-auto mb-14 w-full max-w-6xl px-4 md:px-6">
-        <div className="rounded-2xl border border-[#d6b36a]/30 bg-gradient-to-r from-[#2b1d12] to-[#181008] p-8 text-center md:p-12">
+        <div className="rounded-2xl border border-[#d6b36a]/30 bg-linear-to-r from-[#2b1d12] to-[#181008] p-8 text-center md:p-12">
           <p className="text-sm uppercase tracking-[0.2em] text-[#d6b36a]">Limited Launch</p>
           <h2 className="mt-2 text-4xl text-[#f5e6c2]">Explore Our New Arrivals</h2>
           <Link

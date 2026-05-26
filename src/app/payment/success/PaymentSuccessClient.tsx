@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useCart } from "@/context/CartContext";
 
 type ResultState =
   | { kind: "loading"; message: string }
@@ -14,6 +15,7 @@ type PaymentSuccessClientProps = {
 };
 
 export default function PaymentSuccessClient({ orderId, valId }: PaymentSuccessClientProps) {
+  const { clearCart } = useCart();
   const [state, setState] = useState<ResultState>({ kind: "loading", message: "Verifying your payment..." });
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export default function PaymentSuccessClient({ orderId, valId }: PaymentSuccessC
           return;
         }
 
+        clearCart();
         setState({ kind: "success", message: "Payment confirmed. Your order has been marked as paid." });
       } catch (error) {
         if (active) {
@@ -53,7 +56,7 @@ export default function PaymentSuccessClient({ orderId, valId }: PaymentSuccessC
     return () => {
       active = false;
     };
-  }, [orderId, valId]);
+  }, [orderId, valId, clearCart]);
 
   return (
     <section className="w-full rounded-3xl border border-[#d6b36a]/20 bg-[#130e0a] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.32)]">
