@@ -1,269 +1,266 @@
-# Oud.co
-
 <div align="center">
-  <img src="./public/preview.png" height="400" width="800" alt="Smart Inventory Cover"/>
+
+# Oud.co - Premium Attar and Perfume Oil E-commerce Web Application
+
+<img src="./public/preview.png" width="800" alt="Oud.co project preview" />
+
+<p>
+  A polished full-stack e-commerce platform for premium attars and perfume oils, built with modern Next.js architecture, secure authentication, online payment support, inventory-aware admin tools, and printable invoice workflows.
+</p>
+
 </div>
 
-Premium perfume oil and attar e-commerce application built with Next.js App Router, React, TypeScript, Tailwind CSS v4, Firebase Authentication, and MongoDB.
+## 🌐 Live Links
 
-## Project Summary
+- Live link: https://oud-co.vercel.app
+- Portfolio Link: https://maksudul-haque.vercel.app
 
-Oud.co is a modern storefront experience for browsing, searching, filtering, and managing perfume products.
+## 📞 Contact
 
-Core capabilities:
+- Phone: +8801518474975
+- Email: smamksudulhaque2000@gmail.com
 
-- Public product browsing and product details.
-- Firebase authentication (Email/Password + Google).
-- Protected product management routes.
-- Live product persistence using MongoDB through the API routes.
-- Responsive UI for desktop and mobile.
+## ✨ Project Overview
 
-## Tech Stack
+Oud.co is designed as a production-ready fragrance storefront with a professional buying experience for customers and a practical operations dashboard for admins. The application covers product discovery, cart management, checkout, payment verification, order tracking, invoice generation, user management, and detailed skeleton loading states to keep the interface stable while data is fetched.
 
-- Framework: Next.js 16.2.4 (App Router)
-- Runtime/UI: React 19.2.4 + React DOM 19.2.4
-- Language: TypeScript 5
-- Styling: Tailwind CSS 4 + PostCSS
-- Auth + Database: Firebase Web SDK 12
-- Icons: lucide-react, react-icons
-- Linting: ESLint 9 + eslint-config-next
+This project combines a refined visual identity with reliable backend workflows. It is suitable for deployment as a live e-commerce site or as a portfolio-grade full-stack case study.
 
-## Runtime Requirements
+## 🚀 What This Application Does
 
-- Node.js >= 20.0.0 (defined in package engines)
-- npm (project uses package-lock.json)
+- Presents premium fragrance products with a premium storefront experience
+- Allows customers to search, filter, and inspect product details
+- Supports cart-based ordering with profile-based autofill at checkout
+- Accepts both Cash on Delivery and SSLCommerz online payments
+- Verifies payments through validation and IPN-based fallback handling
+- Stores products, orders, and user profiles in MongoDB
+- Uses Firebase Authentication for sign-in, sign-up, Google login, and role-based access
+- Gives admins control over products, users, order statuses, and invoice exports
+- Generates professional PDF invoices for single orders and batch date ranges
+- Uses layout-matched skeleton loading screens across the entire app
 
-## Main Features
+## 🧩 Key Features
 
-### Public Experience
+### Customer Experience
 
-- Home page with:
-  - Hero section
-  - Featured products
-  - Why choose us section
-  - Testimonials
-  - Promotional CTA banner
-- Products page:
-  - Real-time text search by title
-  - Category filter
-  - Price range filter
-- Product details page:
-  - Full description and specifications
-  - Related products from same category
-- About page and Contact page
+- Modern landing page with featured products and brand storytelling
+- Product catalog with live search and price/category filters
+- Product details page with related items
+- Persistent cart state for a smoother shopping journey
+- Checkout page with prefilled customer name, email, phone, and address when available
+- Order history page with payment and fulfillment visibility
+- Payment success, fail, and cancel flows for gateway handling
 
-### Authentication
+### Admin Experience
 
-- Register with name, email, and password.
-- Login with email/password.
-- Google sign-in support.
-- Session state persisted via Firebase auth listener.
+- Dedicated dashboard for managing products, orders, and users
+- Separate fulfillment and payment status controls for clearer operational handling
+- Product add, edit, and delete workflows
+- User role management for admin/customer access control
+- Single-order invoice download
+- Batch invoice download for today, last 1 month, and last 1 year
+- Professional admin loading states matched to each page layout
 
-### Protected Product Management
+### Reliability and UX
 
-- Add product route (protected)
-- Manage products route (protected)
-- Edit product route (protected)
-- Create, update, and delete products in the MongoDB `products` collection
+- Skeleton loading screens tailored to each route and layout
+- Stable server-side PDF generation
+- Deployment-safe build and lint workflow
+- Role-aware route protection and access gating
 
-### Notifications and UX
+## 🛠 Tech Stack
 
-- Global toast notification system.
-- Confirmation modal before destructive actions.
-- Responsive navbar with user dropdown + mobile menu.
+### Frontend
 
-## Route Map
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- Lucide React icons
 
-### App Routes
+### Backend and Data
 
-- `/` Home page
-- `/products` Product listing with search + filters
-- `/products/[id]` Product details
-- `/about` About page
-- `/contact` Contact page
-- `/login` Login page
-- `/register` Register page
+- MongoDB for persistent application data
+- Next.js route handlers for API endpoints
+- Server-side PDF generation using PDFKit
 
-### Protected Routes
+### Authentication and Access Control
 
-- `/products/add` Add product
-- `/products/manage` Manage products
-- `/products/manage/[id]` Edit product
+- Firebase Authentication
+- Google sign-in support
+- Role-based access control for admin routes
 
-Unauthenticated access to protected routes redirects to:
+### Payments
 
-- `/login?next=<encoded-current-path>`
+- SSLCommerz payment gateway
+- Payment initiation, validation, and IPN handling
 
-## Architecture and Data Flow
+### Deployment and Tooling
 
-### Auth Layer
+- Vercel deployment support
+- ESLint
+- TypeScript compiler checks
 
-- `src/context/AuthContext.tsx`
-  - Exposes: `user`, `loading`, `login`, `register`, `loginWithGoogle`, `logout`
-  - Uses Firebase `onAuthStateChanged` for session sync
+## 🗂 Project Structure
 
-### UI Shell
+- `src/app` - App Router pages, route handlers, and route-level loading states
+- `src/components` - Reusable UI components, skeletons, modals, and forms
+- `src/context` - Auth, cart, products, and toast state providers
+- `src/lib` - MongoDB, Firebase, payments, products, users, orders, and PDF helpers
+- `src/types` - Shared TypeScript models and interfaces
+- `public` - Static assets such as the hero image and preview image
 
-- `src/app/layout.tsx`
-  - Loads global fonts and styles
-  - Wraps app with:
-    - `AuthProvider`
-    - `ProductsProvider`
-    - `ToastProvider`
-  - Shared layout includes `Navbar` and `Footer`
+## 📱 Main Pages
 
-### Product Data Layer
+- Home page with featured products and brand sections
+- Products catalog with search and filtering controls
+- Product details page with related product recommendations
+- Cart and checkout pages
+- Login and registration pages
+- Profile page for customer contact information
+- Orders page for customer order history
+- Admin users page
+- Admin orders page
+- Admin product management pages
+- Payment success, failure, and cancellation pages
 
-- `src/lib/products.ts`
-  - Product form defaults, image normalization, and request helpers
-  - Image source normalization and validation
+## 🔐 Admin Capabilities
 
-- `src/context/ProductsContext.tsx`
-  - Loads live product data from the API and manages client-side state
-  - Exposes `products`, `loading`, `error`, and CRUD actions
+- Add new products
+- Edit existing product records
+- Delete products with confirmation
+- Update user roles
+- Review order payment status
+- Update fulfillment status independently from payment state
+- Download PDFs for a single order
+- Export PDFs for date-based batches
 
-### Product Types
+## 📄 Invoice and PDF Workflow
 
-- `src/types/product.ts`
-  - `ProductCategory`
-  - `Product`
-  - `NewProductInput`
+Invoice generation is handled server-side using PDFKit. The invoice system supports:
 
-## Project Structure
+- Single invoice export from an order record
+- Batch exports for predefined date ranges
+- Print-friendly formatting for packing and operations
+- Cleaner typography and spacing for readability
 
-```text
-.
-|- public/
-|- src/
-|  |- app/
-|  |  |- about/page.tsx
-|  |  |- contact/page.tsx
-|  |  |- login/page.tsx
-|  |  |- register/page.tsx
-|  |  |- products/
-|  |  |  |- page.tsx
-|  |  |  |- [id]/page.tsx
-|  |  |  |- add/page.tsx
-|  |  |  |- manage/page.tsx
-|  |  |  |- manage/[id]/page.tsx
-|  |  |- globals.css
-|  |  |- layout.tsx
-|  |  |- page.tsx
-|  |- components/
-|  |  |- ConfirmModal.tsx
-|  |  |- Footer.tsx
-|  |  |- Navbar.tsx
-|  |  |- ProductCard.tsx
-|  |  |- ProductForm.tsx
-|  |  |- ProtectedRoute.tsx
-|  |- context/
-|  |  |- AuthContext.tsx
-|  |  |- ToastContext.tsx
-|  |- lib/
-|  |  |- firebase.ts
-|  |  |- products.ts
-|  |- types/
-|     |- product.ts
-|- next.config.ts
-|- package.json
-```
+The PDF output is designed to be practical for admin use while still looking polished enough for customer-facing delivery documentation.
 
-## Environment Variables
+## ⏳ Loading Experience
 
-Create `.env.local` with Firebase web config:
+The project uses page-specific skeleton screens instead of generic placeholder text. Each loading state is sized to match the real page layout as closely as possible so the interface does not jump when data arrives.
+
+This includes:
+
+- Storefront landing page loading
+- Product grid loading
+- Product detail loading
+- Product management loading
+- Add/edit product form loading
+- Admin orders loading
+- Admin users loading
+- Checkout, profile, login, register, and payment verification loading
+
+## 🔧 Environment Variables
+
+Create a `.env.local` file in the project root and configure the following values:
 
 ```env
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-NEXT_PUBLIC_ADMIN_EMAILS=
-NEXT_PUBLIC_ADMIN_UIDS=
+MONGODB_URI=your_mongodb_connection_string
+NEXT_PUBLIC_SITE_URL=https://oud-co.vercel.app
+NEXT_PUBLIC_CURRENCY=BDT
+NEXT_PUBLIC_ADMIN_EMAILS=email1@example.com,email2@example.com
+NEXT_PUBLIC_ADMIN_UIDS=uid1,uid2
+
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+
+SSL_COMMERZ_STORE_ID=your_sslcommerz_store_id
+SSL_COMMERZ_STORE_PASSWORD=your_sslcommerz_store_password
+SSL_COMMERZ_IS_TEST=true
 ```
 
-Firebase setup checklist:
+### Variable Notes
 
-- Create Firebase project
-- Enable Authentication
-- Create a Firestore database
-- Enable Email/Password provider
-- Enable Google provider
-- Add your localhost and Vercel domains to Firebase Authentication > Settings > Authorized domains
-- Set the Firebase web config variables in Vercel Project Settings > Environment Variables for Production and Preview deployments
-- Optionally set `NEXT_PUBLIC_ADMIN_EMAILS` or `NEXT_PUBLIC_ADMIN_UIDS` to restrict product add/edit/delete access to specific accounts
+- `MONGODB_URI` connects the app to MongoDB.
+- `NEXT_PUBLIC_SITE_URL` should match the deployed domain in production.
+- `NEXT_PUBLIC_ADMIN_EMAILS` and `NEXT_PUBLIC_ADMIN_UIDS` are used for bootstrap admin access.
+- Firebase values are required for authentication and profile workflows.
+- SSLCommerz values are required for payment initiation and validation.
+- Set `SSL_COMMERZ_IS_TEST=false` only when moving to live payment mode.
 
-If login or registration works locally but fails on the live Vercel URL, the usual cause is that the deployed domain is missing from Firebase Authorized domains or one of the `NEXT_PUBLIC_FIREBASE_*` variables is not configured in Vercel.
+## 🧪 Local Setup
 
-## Getting Started
-
-1. Install dependencies:
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-2. Configure environment variables in `.env.local`.
+### 2. Add environment variables
 
-3. Run development server:
+Create `.env.local` and paste the values listed above.
+
+### 3. Start the development server
 
 ```bash
 npm run dev
 ```
 
-4. Open:
+The application will run on the default Next.js development port.
 
-```text
-http://localhost:3000
-```
-
-## Available Scripts
-
-- `npm run dev` Start local dev server
-- `npm run build` Create production build
-- `npm run start` Start production server
-- `npm run lint` Run ESLint
-- `npm run deploy:check` Run lint + build before deployment
-
-## Image Configuration
-
-Remote image loading is configured in `next.config.ts` for:
-
-- `images.unsplash.com`
-
-If additional external image hosts are required, add them to `images.remotePatterns`.
-
-## Product Management Behavior
-
-- The `products` collection stays empty until you manually add records.
-- New products are created in MongoDB with generated document IDs.
-- Editing a product updates the corresponding MongoDB document.
-- Deleting a product removes the MongoDB document.
-- If the product API is unavailable, the UI shows an error/empty state instead of auto-seeding data.
-- If no admin allowlist is configured, any authenticated user can manage products; otherwise only allowlisted users can write.
-
-## Deployment Notes
-
-- Vercel configuration file exists: `vercel.json`
-- Before deploying, confirm the live domain is listed in Firebase Authorized domains and that all Firebase environment variables are set in Vercel.
-- Recommended pre-deploy check:
+## 🏗 Production Commands
 
 ```bash
+npm run build
+npm run start
+```
+
+## ✅ Quality Checks
+
+```bash
+npm run lint
 npm run deploy:check
 ```
 
-## Known Constraints
+`npm run deploy:check` runs linting first and then executes the production build.
 
-- Product data depends on `MONGODB_URI` for live persistence.
-- Contact form currently simulates submission and does not call a backend API.
+## 🚢 Deployment Notes
 
-## Maintenance Suggestions
+- The app is ready for deployment on Vercel.
+- Configure all environment variables in Vercel before deploying.
+- Make sure Firebase authorized domains include the live domain.
+- Ensure SSLCommerz callback, success, fail, cancel, and IPN URLs resolve correctly in production.
+- Verify that MongoDB connectivity is available from the deployment environment.
 
-- Add role-based authorization for admin-only product management.
-- Add automated tests (unit/integration/e2e).
-- Add CI workflow for lint/build checks on pull requests.
+## 🧠 Technical Notes
 
-## License
+- MongoDB access is implemented through shared helpers in `src/lib/mongodb.ts` and the related collection modules.
+- Firebase Authentication is initialized on the client side through the auth context.
+- PDF invoices are generated on the server and returned as downloadable attachments.
+- Route-level loading states are implemented with layout-aware skeletons to reduce layout shift.
+- Admin pages use protected routing and role-aware access checks.
 
-Copyright (c) 2026 Oud.co. All rights reserved.
+## 🧭 Useful Scripts
+
+- `npm run dev` - Start the development server
+- `npm run build` - Create the production build
+- `npm run start` - Start the production server
+- `npm run lint` - Run ESLint
+- `npm run deploy:check` - Run lint and build together
+
+## 📷 Visual Identity
+
+The interface uses a dark luxury theme with gold accents, soft gradients, and page-specific loading skeletons. The goal is to keep the application feeling premium, stable, and visually coherent while still remaining fast and practical.
+
+## 📌 Summary
+
+Oud.co is a full-featured, portfolio-ready e-commerce solution that combines premium visual design with production-minded backend workflows. It is built to support real customer shopping, admin operations, payment verification, and invoice generation in a single integrated system.
+
+## 📜 License
+
+This project is provided for commercial and personal portfolio use by the owner.
