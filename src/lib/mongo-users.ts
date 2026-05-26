@@ -44,6 +44,8 @@ export async function upsertSelfProfile(input: {
   uid: string;
   email: string;
   displayName: string;
+  phone?: string;
+  address?: string;
   bootstrapAdmin: boolean;
 }) {
   const collection = await getUsersCollection();
@@ -56,6 +58,8 @@ export async function upsertSelfProfile(input: {
     uid: input.uid,
     email: input.email,
     displayName: input.displayName,
+    phone: input.phone?.trim() || existing?.phone || "",
+    address: input.address?.trim() || existing?.address || "",
     role: nextRole,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
@@ -82,6 +86,8 @@ export async function updateUserRole(targetUid: string, role: UserRole, promoted
     uid: targetUid,
     email: existing?.email || "",
     displayName: existing?.displayName || "",
+    phone: existing?.phone || "",
+    address: existing?.address || "",
     role,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
@@ -90,4 +96,10 @@ export async function updateUserRole(targetUid: string, role: UserRole, promoted
 
   await collection.updateOne({ _id: targetUid }, { $set: profile }, { upsert: true });
   return toProfile(profile);
+}
+
+export async function getSelfProfile(uid: string) {
+  const collection = await getUsersCollection();
+  const profile = await collection.findOne({ _id: uid });
+  return profile ? toProfile(profile) : null;
 }

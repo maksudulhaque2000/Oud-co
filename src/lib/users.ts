@@ -47,8 +47,35 @@ export async function ensureUserProfile(user: User): Promise<UserProfile> {
       uid: user.uid,
       email: user.email || "",
       displayName: user.displayName || user.email || "User",
+      phone: "",
+      address: "",
       bootstrapAdmin: isBootstrapAdmin(user),
     }),
+  });
+
+  return payload.profile;
+}
+
+export async function fetchSelfProfile(uid: string): Promise<UserProfile | null> {
+  try {
+    const payload = await requestJson<{ profile: UserProfile }>(`/api/users/self?uid=${encodeURIComponent(uid)}`);
+    return payload.profile;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateSelfProfile(input: {
+  uid: string;
+  email: string;
+  displayName: string;
+  phone: string;
+  address: string;
+  bootstrapAdmin: boolean;
+}) {
+  const payload = await requestJson<{ profile: UserProfile }>("/api/users/self", {
+    method: "PATCH",
+    body: JSON.stringify(input),
   });
 
   return payload.profile;

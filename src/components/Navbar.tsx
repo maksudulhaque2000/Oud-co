@@ -16,7 +16,7 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, logout, loading, canManageProducts, canManageUsers, role } = useAuth();
+  const { user, logout, loading, canManageProducts, canManageUsers } = useAuth();
   const { itemCount } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -111,6 +111,13 @@ export default function Navbar() {
                   <p className="truncate text-sm text-[#f7efdb]">{user?.displayName || "User"}</p>
                   <p className="mb-3 truncate text-xs text-[#e7d2a0]">{user?.email}</p>
                   <div className="space-y-2 text-sm">
+                    <Link
+                      href="/profile"
+                      className="block rounded-md px-3 py-2 text-[#f0dca7] hover:bg-[#2a1d12]"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      My Profile
+                    </Link>
                     {canManageProducts ? (
                       <>
                         <Link
@@ -138,7 +145,6 @@ export default function Navbar() {
                         ) : null}
                       </>
                     ) : null}
-                    <p className="px-3 pt-2 text-xs uppercase tracking-[0.2em] text-[#a89267]">Role: {role}</p>
                     <button
                       type="button"
                       onClick={async () => {
@@ -229,6 +235,13 @@ export default function Navbar() {
             ) : (
               <div className="space-y-2">
                 <p className="truncate text-sm text-[#f7efdb]">{user?.displayName || user?.email}</p>
+                <Link
+                  href="/profile"
+                  className="block rounded-md px-3 py-2 text-sm text-[#eadfc3] hover:bg-[#2a1d12]"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  My Profile
+                </Link>
                 {canManageProducts ? (
                   <>
                     <Link
@@ -256,7 +269,6 @@ export default function Navbar() {
                     ) : null}
                   </>
                 ) : null}
-                <p className="px-3 pt-2 text-xs uppercase tracking-[0.2em] text-[#a89267]">Role: {role}</p>
                 <button
                   type="button"
                   onClick={async () => {

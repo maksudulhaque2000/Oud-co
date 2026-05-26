@@ -5,9 +5,10 @@ import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { createOrder, initiateSslcommerzPayment } from "@/lib/orders";
 import { normalizeImageSource } from "@/lib/products";
+import { fetchSelfProfile } from "@/lib/users";
 import type { PaymentMethod } from "@/types/order";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useToast } from "@/context/ToastContext";
 
 const paymentMethods: Array<{ value: PaymentMethod; label: string }> = [
@@ -23,10 +24,47 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash_on_delivery");
   const [address, setAddress] = useState("");
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const customerName = user?.displayName?.trim() || user?.email?.trim() || "Customer";
   const customerEmail = user?.email?.trim() || "";
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadProfile() {
+      if (!user?.uid) {
+        setProfileLoaded(true);
+        return;
+      }
+
+      try {
+        const profile = await fetchSelfProfile(user.uid);
+        if (!active) {
+          return;
+        }
+
+        if (profile?.phone) {
+          setPhone((current) => current || profile.phone || "");
+        }
+
+        if (profile?.address) {
+          setAddress((current) => current || profile.address || "");
+        }
+      } finally {
+        if (active) {
+          setProfileLoaded(true);
+        }
+      }
+    }
+
+    void loadProfile();
+
+    return () => {
+      active = false;
+    };
+  }, [user?.uid]);
 
   const orderItems = useMemo(
     () =>
@@ -150,7 +188,7 @@ export default function CheckoutPage() {
                   required
                   className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] focus:ring-2"
                 />
-                <p className="mt-1 text-xs text-[#bca475]">Mobile number is required to place the order.</p>
+                <p className="mt-1 text-xs text-[#bca475]">{profileLoaded && phone ? "Loaded from your profile." : "Mobile number is required to place the order."}</p>
               </div>
             </div>
 
@@ -176,6 +214,7 @@ export default function CheckoutPage() {
                 placeholder="Enter the full address where you want to receive your order"
                 className="w-full rounded-lg border border-[#d6b36a]/30 bg-[#1c140f] px-4 py-3 text-[#f8ecd0] outline-none ring-[#c9a84c] focus:ring-2"
               />
+              <p className="mt-1 text-xs text-[#bca475]">{profileLoaded && address ? "Loaded from your profile." : "Save your address in your profile to auto-fill it next time."}</p>
             </div>
 
             <button type="submit" disabled={loading} className="rounded-lg bg-[#c9a84c] px-5 py-3 font-semibold text-[#1f1300] transition hover:bg-[#d8b760] disabled:opacity-60">
