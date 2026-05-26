@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrder } from "@/lib/mongo-orders";
+import { getOrder, updateOrderGatewaySessionKey } from "@/lib/mongo-orders";
 
 type SslGatewayResponse = {
   GatewayPageURL?: string;
@@ -144,6 +144,10 @@ export async function POST(request: Request) {
         },
         { status: 502 },
       );
+    }
+
+    if (payload?.sessionkey) {
+      await updateOrderGatewaySessionKey(order.id, payload.sessionkey);
     }
 
     return NextResponse.json({ gatewayUrl, sessionKey: payload?.sessionkey || "" });

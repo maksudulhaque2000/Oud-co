@@ -135,13 +135,22 @@ export default function Navbar() {
                           Manage Products
                         </Link>
                         {canManageUsers ? (
-                          <Link
-                            href="/admin/users"
-                            className="block rounded-md px-3 py-2 text-[#f0dca7] hover:bg-[#2a1d12]"
-                            onClick={() => setProfileOpen(false)}
-                          >
-                            Manage Users
-                          </Link>
+                          <>
+                            <Link
+                              href="/admin/orders"
+                              className="block rounded-md px-3 py-2 text-[#f0dca7] hover:bg-[#2a1d12]"
+                              onClick={() => setProfileOpen(false)}
+                            >
+                              Manage Orders
+                            </Link>
+                            <Link
+                              href="/admin/users"
+                              className="block rounded-md px-3 py-2 text-[#f0dca7] hover:bg-[#2a1d12]"
+                              onClick={() => setProfileOpen(false)}
+                            >
+                              Manage Users
+                            </Link>
+                          </>
                         ) : null}
                       </>
                     ) : null}
@@ -259,13 +268,22 @@ export default function Navbar() {
                       Manage Products
                     </Link>
                     {canManageUsers ? (
-                      <Link
-                        href="/admin/users"
-                        className="block rounded-md px-3 py-2 text-sm text-[#eadfc3] hover:bg-[#2a1d12]"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        Manage Users
-                      </Link>
+                      <>
+                        <Link
+                          href="/admin/orders"
+                          className="block rounded-md px-3 py-2 text-sm text-[#eadfc3] hover:bg-[#2a1d12]"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          Manage Orders
+                        </Link>
+                        <Link
+                          href="/admin/users"
+                          className="block rounded-md px-3 py-2 text-sm text-[#eadfc3] hover:bg-[#2a1d12]"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          Manage Users
+                        </Link>
+                      </>
                     ) : null}
                   </>
                 ) : null}

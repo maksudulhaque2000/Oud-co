@@ -116,6 +116,7 @@ export async function createOrder(input: CreateOrderInput) {
   }
 
   const totals = computeTotals(items);
+  const isCashOnDelivery = input.paymentMethod === "cash_on_delivery";
   const order: OrderDocument = {
     _id: randomUUID(),
     id: randomUUID(),
@@ -129,8 +130,9 @@ export async function createOrder(input: CreateOrderInput) {
     items,
     paymentMethod: input.paymentMethod,
     shippingMethod: input.shippingMethod ?? "home_delivery",
-    status: "pending",
+    status: isCashOnDelivery ? "processing" : "pending",
     paymentStatus: "pending",
+    gatewaySessionKey: undefined,
     notes: input.notes?.trim() || undefined,
     createdAt: now,
     updatedAt: now,
@@ -161,6 +163,24 @@ export async function updateOrderStatus(id: string, status: OrderStatus, payment
     deliveredAt: status === "delivered" ? now : existing.deliveredAt,
     canceledAt: status === "canceled" ? now : existing.canceledAt,
     refundedAt: status === "refunded" ? now : existing.refundedAt,
+  };
+
+  await collection.updateOne({ _id: id }, { $set: next });
+  return toOrder(next);
+}
+
+export async function updateOrderGatewaySessionKey(id: string, sessionKey: string) {
+  const collection = await getOrdersCollection();
+  const existing = await collection.findOne({ _id: id });
+
+  if (!existing) {
+    throw new Error("Order not found.");
+  }
+
+  const next: OrderDocument = {
+    ...existing,
+    gatewaySessionKey: sessionKey,
+    updatedAt: new Date().toISOString(),
   };
 
   await collection.updateOne({ _id: id }, { $set: next });

@@ -12,42 +12,103 @@ type ResultState =
 type PaymentSuccessClientProps = {
   orderId: string;
   valId: string;
+  status: string;
+  amount: string;
+  tranId: string;
 };
 
-export default function PaymentSuccessClient({ orderId, valId }: PaymentSuccessClientProps) {
+function isSuccessfulGatewayStatus(status: string) {
+  const normalized = status.trim().toUpperCase();
+  return normalized === "VALID" || normalized === "VALIDATED";
+}
+
+export default function PaymentSuccessClient({ orderId, valId, status, amount, tranId }: PaymentSuccessClientProps) {
   const { clearCart } = useCart();
   const [state, setState] = useState<ResultState>({ kind: "loading", message: "Verifying your payment..." });
+
+  async function confirmWithGatewayReturn() {
+    const response = await fetch("/api/payments/sslcommerz/ipn", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId,
+        tran_id: tranId || orderId,
+        status,
+        amount,
+      }),
+    });
+
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+
+    if (!response.ok) {
+      throw new Error(payload?.error || "Payment validation failed.");
+    }
+  }
 
   useEffect(() => {
     let active = true;
 
     async function validatePayment() {
-      if (!orderId || !valId) {
-        if (active) {
-          setState({ kind: "error", message: "Payment reference is missing. Please contact support if money was deducted." });
-        }
-        return;
-      }
-
       try {
-        const response = await fetch(`/api/payments/sslcommerz/validate?orderId=${encodeURIComponent(orderId)}&val_id=${encodeURIComponent(valId)}`);
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        if (!orderId) {
+          if (active) {
+            setState({ kind: "error", message: "Payment reference is missing. Please contact support if money was deducted." });
+          }
+          return;
+        }
+
+        const query = new URLSearchParams({ orderId });
+        if (valId) {
+          query.set("val_id", valId);
+        }
+
+        const response = await fetch(`/api/payments/sslcommerz/validate?${query.toString()}`);
+        const payload = (await response.json().catch(() => null)) as { error?: string; status?: string } | null;
 
         if (!active) {
           return;
         }
 
-        if (!response.ok) {
-          setState({ kind: "error", message: payload?.error || "Payment validation failed." });
+        if (response.ok && payload?.status === "pending") {
+          setState({ kind: "loading", message: "Payment is still being confirmed. Please refresh after a moment." });
           return;
         }
 
-        clearCart();
-        setState({ kind: "success", message: "Payment confirmed. Your order has been marked as paid." });
-      } catch (error) {
-        if (active) {
-          setState({ kind: "error", message: error instanceof Error ? error.message : "Unable to verify payment." });
+        if (response.ok) {
+          clearCart();
+          setState({ kind: "success", message: "Payment confirmed. Your order has been marked as paid." });
+          return;
         }
+
+        if (isSuccessfulGatewayStatus(status) && amount) {
+          try {
+            await confirmWithGatewayReturn();
+            if (!active) {
+              return;
+            }
+
+            clearCart();
+            setState({ kind: "success", message: "Payment confirmed. Your order has been marked as paid." });
+            return;
+          } catch (fallbackError) {
+            if (!active) {
+              return;
+            }
+
+            setState({ kind: "error", message: (fallbackError instanceof Error ? fallbackError.message : null) || payload?.error || "Payment validation failed." });
+            return;
+          }
+        }
+
+        if (active) {
+          setState({ kind: "error", message: payload?.error || "Payment validation failed." });
+        }
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+
+        setState({ kind: "error", message: error instanceof Error ? error.message : "Unable to verify payment." });
       }
     }
 
@@ -56,7 +117,7 @@ export default function PaymentSuccessClient({ orderId, valId }: PaymentSuccessC
     return () => {
       active = false;
     };
-  }, [orderId, valId, clearCart]);
+  }, [amount, clearCart, orderId, status, tranId, valId]);
 
   return (
     <section className="w-full rounded-3xl border border-[#d6b36a]/20 bg-[#130e0a] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.32)]">

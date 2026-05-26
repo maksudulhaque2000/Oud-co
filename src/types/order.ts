@@ -49,6 +49,7 @@ export type Order = {
   shippingMethod: ShippingMethod;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
+  gatewaySessionKey?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;

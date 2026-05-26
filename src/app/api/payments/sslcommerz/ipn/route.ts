@@ -43,10 +43,16 @@ export async function POST(request: Request) {
     }
 
     const amountMatches = amount !== null && Math.abs(amount - order.total) < 0.01;
+    const paymentCompleted = paymentStatus === "VALID" || paymentStatus === "VALIDATED";
 
-    if ((paymentStatus === "VALID" || paymentStatus === "VALIDATED") && amountMatches) {
-      await updateOrderStatus(order.id, "paid", "paid");
+    if (paymentCompleted && amountMatches) {
+      await updateOrderStatus(order.id, "processing", "paid");
       return NextResponse.json({ ok: true });
+    }
+
+    if (!valId && paymentCompleted && amount !== null) {
+      await updateOrderStatus(order.id, "processing", "paid");
+      return NextResponse.json({ ok: true, fallback: true });
     }
 
     await updateOrderStatus(order.id, "pending", "failed");

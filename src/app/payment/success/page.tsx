@@ -9,6 +9,9 @@ export default async function PaymentSuccessPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const orderId = typeof resolvedSearchParams.orderId === "string" ? resolvedSearchParams.orderId : "";
   const valId = typeof resolvedSearchParams.val_id === "string" ? resolvedSearchParams.val_id : "";
+  const status = typeof resolvedSearchParams.status === "string" ? resolvedSearchParams.status : "";
+  const amount = typeof resolvedSearchParams.amount === "string" ? resolvedSearchParams.amount : "";
+  const tranId = typeof resolvedSearchParams.tran_id === "string" ? resolvedSearchParams.tran_id : "";
 
   return (
     <main className="mx-auto flex min-h-[70vh] w-full max-w-3xl items-center px-4 py-12 md:px-6">
@@ -21,7 +24,7 @@ export default async function PaymentSuccessPage({
           </section>
         }
       >
-        <PaymentSuccessClient orderId={orderId} valId={valId} />
+        <PaymentSuccessClient orderId={orderId} valId={valId} status={status} amount={amount} tranId={tranId} />
       </Suspense>
     </main>
   );

@@ -33,6 +33,15 @@ export async function createOrder(input: CreateOrderInput) {
   return payload.order;
 }
 
+export async function updateOrderStatus(orderId: string, input: { status?: Order["status"]; paymentStatus?: Order["paymentStatus"] }) {
+  const payload = await requestJson<{ order: Order }>(`/api/orders/${encodeURIComponent(orderId)}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+
+  return payload.order;
+}
+
 export async function initiateSslcommerzPayment(orderId: string) {
   const payload = await requestJson<{ gatewayUrl: string; sessionKey: string }>("/api/payments/sslcommerz", {
     method: "POST",

@@ -6,6 +6,46 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchOrders } from "@/lib/orders";
 import type { Order } from "@/types/order";
 
+function getStatusBadgeClass(status: Order["status"]) {
+  switch (status) {
+    case "paid":
+      return "border border-emerald-400/25 bg-emerald-500/10 text-emerald-200";
+    case "processing":
+      return "border border-sky-400/25 bg-sky-500/10 text-sky-200";
+    case "shipped":
+      return "border border-cyan-400/25 bg-cyan-500/10 text-cyan-200";
+    case "delivered":
+      return "border border-lime-400/25 bg-lime-500/10 text-lime-200";
+    case "canceled":
+      return "border border-rose-400/25 bg-rose-500/10 text-rose-200";
+    case "refunded":
+      return "border border-violet-400/25 bg-violet-500/10 text-violet-200";
+    default:
+      return "border border-amber-400/25 bg-amber-500/10 text-amber-200";
+  }
+}
+
+function getPaymentStatusBadgeClass(status: Order["paymentStatus"]) {
+  switch (status) {
+    case "paid":
+      return "border border-emerald-400/25 bg-emerald-500/10 text-emerald-200";
+    case "failed":
+      return "border border-rose-400/25 bg-rose-500/10 text-rose-200";
+    case "refunded":
+      return "border border-violet-400/25 bg-violet-500/10 text-violet-200";
+    default:
+      return "border border-amber-400/25 bg-amber-500/10 text-amber-200";
+  }
+}
+
+function formatStatusLabel(value: string) {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function formatPaymentMethod(value: string) {
+  return value === "cash_on_delivery" ? "Cash on Delivery" : formatStatusLabel(value);
+}
+
 export default function OrdersPage() {
   const { user, role } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -72,7 +112,7 @@ export default function OrdersPage() {
                   <th className="px-4 py-3">Products</th>
                   <th className="px-4 py-3">Total</th>
                   <th className="px-4 py-3">Payment</th>
-                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Order Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -98,12 +138,18 @@ export default function OrdersPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 font-semibold text-[#d6b36a]">Tk {order.total.toFixed(2)}</td>
-                    <td className="px-4 py-3">{order.paymentMethod.replace(/_/g, " ")}</td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
-                        <span className="inline-flex rounded-full bg-[#2f2114] px-2.5 py-1 text-xs font-semibold text-[#eecf8b]">{order.status}</span>
-                        <span className="inline-flex rounded-full border border-[#d6b36a]/20 px-2.5 py-1 text-xs text-[#dccba6]">{order.paymentStatus}</span>
+                        <div className="text-sm text-[#f8ecd0]">{formatPaymentMethod(order.paymentMethod)}</div>
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${getPaymentStatusBadgeClass(order.paymentStatus)}`}>
+                          {formatStatusLabel(order.paymentStatus)}
+                        </span>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusBadgeClass(order.status)}`}>
+                        {formatStatusLabel(order.status)}
+                      </span>
                     </td>
                   </tr>
                 ))}
