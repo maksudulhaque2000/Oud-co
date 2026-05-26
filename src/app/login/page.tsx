@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
+import { AuthGateSkeleton } from "@/components/LoadingSkeletons";
 import { useAuth } from "@/context/AuthContext";
 
 function LoginForm() {
@@ -109,7 +110,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <main className="mx-auto flex w-full max-w-md px-4 py-16">
-      <Suspense fallback={<p className="text-sm text-[#d6b36a]">Loading login form...</p>}>
+      <Suspense fallback={<AuthGateSkeleton />}>
         <LoginForm />
       </Suspense>
     </main>

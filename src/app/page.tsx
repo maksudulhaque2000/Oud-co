@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
+import { ProductGridSkeleton } from "@/components/LoadingSkeletons";
 import { useProducts } from "@/context/ProductsContext";
 import { Gem, Globe2, Sparkles, Truck } from "lucide-react";
 
@@ -73,9 +74,7 @@ export default function Home() {
         {error ? (
           <p className="rounded-lg border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</p>
         ) : loading && featured.length === 0 ? (
-          <p className="rounded-lg border border-[#d6b36a]/20 bg-[#130e0a] p-4 text-sm text-[#dccba6]">
-            Loading products from the database...
-          </p>
+          <ProductGridSkeleton count={3} />
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((product) => (

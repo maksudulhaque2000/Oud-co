@@ -1,5 +1,6 @@
 "use client";
 
+import { FormSkeleton } from "@/components/LoadingSkeletons";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -89,6 +90,9 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
+      {loading ? (
+        <FormSkeleton />
+      ) : (
       <main className="mx-auto w-full max-w-3xl px-4 py-12 md:px-6">
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d6b36a]/20 bg-[#1a120b] text-[#d6b36a]">
@@ -134,6 +138,7 @@ export default function ProfilePage() {
           </div>
         </form>
       </main>
+      )}
     </ProtectedRoute>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { ProductFormSkeleton } from "@/components/LoadingSkeletons";
 import ProductForm from "@/components/ProductForm";
 import { useProducts } from "@/context/ProductsContext";
 import { Product } from "@/types/product";
@@ -15,13 +16,7 @@ export default function EditProductPage() {
   const product = getProductById(params.id) as Product | undefined;
 
   if (loading && !product) {
-    return (
-      <ProtectedRoute requireAdmin>
-        <main className="mx-auto w-full max-w-3xl px-4 py-12 md:px-6">
-          <p className="rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">Loading product...</p>
-        </main>
-      </ProtectedRoute>
-    );
+    return <ProtectedRoute requireAdmin><ProductFormSkeleton headingWidth="w-40" /></ProtectedRoute>;
   }
 
   if (!product) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminUsersSkeleton } from "@/components/LoadingSkeletons";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -83,7 +84,7 @@ export default function ManageUsersPage() {
         {error ? <p className="mt-4 rounded-lg border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</p> : null}
 
         {loading ? (
-          <p className="mt-6 rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">Loading users...</p>
+          <AdminUsersSkeleton />
         ) : (
           <section className="mt-6 overflow-hidden rounded-xl border border-[#d6b36a]/20">
             <table className="w-full border-collapse">

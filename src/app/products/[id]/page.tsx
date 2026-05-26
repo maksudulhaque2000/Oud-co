@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
+import { ProductDetailSkeleton } from "@/components/LoadingSkeletons";
 import { useCart } from "@/context/CartContext";
 import { normalizeImageSource } from "@/lib/products";
 import { useProducts } from "@/context/ProductsContext";
@@ -18,13 +19,7 @@ export default function ProductDetailsPage() {
   const product = products.find((item) => item.id === params.id);
 
   if (loading && !product) {
-    return (
-      <main className="mx-auto w-full max-w-5xl px-4 py-16 md:px-6">
-        <p className="rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">
-          Loading product details...
-        </p>
-      </main>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!product) {

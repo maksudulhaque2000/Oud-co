@@ -1,6 +1,7 @@
 "use client";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { TableSkeleton } from "@/components/LoadingSkeletons";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useMemo, useState } from "react";
 import { fetchOrders } from "@/lib/orders";
@@ -96,7 +97,7 @@ export default function OrdersPage() {
         <p className="mt-2 text-sm text-[#dccba6]">Customers can view their own orders. Admins can review every order.</p>
 
         {error ? <p className="mt-4 rounded-lg border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</p> : null}
-        {loading ? <p className="mt-6 rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">Loading orders...</p> : null}
+        {loading ? <TableSkeleton rows={4} columns={6} /> : null}
 
         {!loading && visibleOrders.length === 0 ? (
           <p className="mt-6 rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">No orders found yet.</p>

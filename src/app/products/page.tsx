@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import ProductCard from "@/components/ProductCard";
+import { ProductGridSkeleton } from "@/components/LoadingSkeletons";
 import { categories } from "@/lib/products";
 import { useProducts } from "@/context/ProductsContext";
 import { ProductCategory } from "@/types/product";
@@ -74,9 +75,7 @@ export default function ProductsPage() {
       </section>
 
       {loading && filtered.length === 0 ? (
-        <p className="rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-center text-[#dccba6]">
-          Loading products from the database...
-        </p>
+        <ProductGridSkeleton count={6} />
       ) : filtered.length > 0 ? (
         <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((product) => (

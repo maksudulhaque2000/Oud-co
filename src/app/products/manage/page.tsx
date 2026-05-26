@@ -4,6 +4,7 @@ import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/context/ToastContext";
+import { AdminShellSkeleton } from "@/components/LoadingSkeletons";
 import { useProducts } from "@/context/ProductsContext";
 import { useState } from "react";
 
@@ -45,7 +46,7 @@ export default function ManageProductsPage() {
         {error ? <p className="mt-4 rounded-lg border border-rose-400/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</p> : null}
 
         {loading && products.length === 0 ? (
-          <p className="mt-6 rounded-lg border border-[#d6b36a]/25 bg-[#130e0a] p-6 text-[#dccba6]">Loading products...</p>
+          <AdminShellSkeleton columns={5} />
         ) : null}
 
         <section className="mt-6 hidden overflow-hidden rounded-xl border border-[#d6b36a]/20 md:block">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { PaymentValidationSkeleton } from "@/components/LoadingSkeletons";
 
 type ResultState =
   | { kind: "loading"; message: string }
@@ -120,18 +121,24 @@ export default function PaymentSuccessClient({ orderId, valId, status, amount, t
   }, [amount, clearCart, orderId, status, tranId, valId]);
 
   return (
-    <section className="w-full rounded-3xl border border-[#d6b36a]/20 bg-[#130e0a] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.32)]">
-      <p className="text-sm uppercase tracking-[0.28em] text-[#c9a84c]">Payment Success</p>
-      <h1 className="mt-3 text-3xl font-semibold text-[#f5e6c2]">Thank you for your order</h1>
-      <p className="mt-3 text-sm text-[#dccba6]">{state.message}</p>
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <Link href="/orders" className="rounded-full bg-[#c9a84c] px-5 py-3 font-semibold text-[#1f1300] transition hover:bg-[#d8b760]">
-          View Orders
-        </Link>
-        <Link href="/products" className="rounded-full border border-[#d6b36a]/20 px-5 py-3 font-semibold text-[#f5e6c2] transition hover:border-[#d6b36a]/40">
-          Continue Shopping
-        </Link>
-      </div>
-    </section>
+    <>
+      {state.kind === "loading" ? (
+        <PaymentValidationSkeleton />
+      ) : (
+        <section className="w-full rounded-3xl border border-[#d6b36a]/20 bg-[#130e0a] p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.32)]">
+          <p className="text-sm uppercase tracking-[0.28em] text-[#c9a84c]">Payment Success</p>
+          <h1 className="mt-3 text-3xl font-semibold text-[#f5e6c2]">Thank you for your order</h1>
+          <p className="mt-3 text-sm text-[#dccba6]">{state.message}</p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/orders" className="rounded-full bg-[#c9a84c] px-5 py-3 font-semibold text-[#1f1300] transition hover:bg-[#d8b760]">
+              View Orders
+            </Link>
+            <Link href="/products" className="rounded-full border border-[#d6b36a]/20 px-5 py-3 font-semibold text-[#f5e6c2] transition hover:border-[#d6b36a]/40">
+              Continue Shopping
+            </Link>
+          </div>
+        </section>
+      )}
+    </>
   );
 }
